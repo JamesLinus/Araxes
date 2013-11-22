@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 BlacklightEVO Release 1 (EVOlution)
 ===================================
 
