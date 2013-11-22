@@ -134,6 +134,15 @@ App_Data/*.mdf
 App_Data/*.ldf
 
 # =========================
+# Project-specific crud
+# =========================
+
+Binaries/*
+Sources/*.bin
+Sources/*.exe
+*.exe
+
+# =========================
 # Windows detritus
 # =========================
 

@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\video">
+      <UniqueIdentifier>{b2c43e67-dbbf-4617-8a5c-8a4b78a1692b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{07e74bdd-5987-42f9-94e0-f82f1e6c7a48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{d320b788-b109-4a53-adb1-e866076ef2d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video">
+      <UniqueIdentifier>{67a926f8-19f7-47fe-9b00-e9cf4569b5bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hardware">
+      <UniqueIdentifier>{297190f7-a1ac-4759-badb-f02b52ff52b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hardware">
+      <UniqueIdentifier>{271f6fa1-6791-4fe1-953a-ae45ee895092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\fs">
+      <UniqueIdentifier>{20201c15-dc46-4854-a7dc-48c96d16fb08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\fs">
+      <UniqueIdentifier>{ff703e56-deb3-4bd3-b609-233c890a1587}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hardware\layouts">
+      <UniqueIdentifier>{41c326c0-2a8a-4b24-a9a7-3f37d73b9c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\user">
+      <UniqueIdentifier>{f600467f-9706-4d7d-a624-311336e2438d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\user">
+      <UniqueIdentifier>{89ae26f1-4f2d-4fbb-9fa7-6243584defb3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\kmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\entry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\global.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\mm.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\video\vga_text.cpp">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\console.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\kprintf.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\exceptions.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\idt.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\gdt.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\irq.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\hardware\pit.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\hardware\pci.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\video\bochs.cpp">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\hardware\keyboard.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\include\core\math.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\fs\vfs.cpp">
+      <Filter>Source Files\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\fs\nullfs.cpp">
+      <Filter>Source Files\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\video\vbox.cpp">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\video\fb_text.cpp">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\video\fb_font.cpp">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\video\xterm_palette.cpp">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\video\vbe.cpp">
+      <Filter>Source Files\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\hardware\uart.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\rmode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\multiboot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\cpu.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\hardware\layouts\qwerty.cpp">
+      <Filter>Source Files\hardware\layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\hardware\layouts\dvorak.cpp">
+      <Filter>Source Files\hardware\layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\hardware\pcicodes.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\fs\kramdisk.cpp">
+      <Filter>Source Files\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\simdmem.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\user\user.cpp">
+      <Filter>Source Files\user</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\include\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\kernel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\mm.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\gdt.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\video\vga_text.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\console.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\exceptions.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\idt.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\irq.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\hardware\pit.h">
+      <Filter>Header Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\hardware\pci.h">
+      <Filter>Header Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\video\bochs.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\hardware\keyboard.h">
+      <Filter>Header Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\fs\vfs.h">
+      <Filter>Header Files\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\math.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\video\vbox.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\video\fb_text.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\video\vbe.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\hardware\uart.h">
+      <Filter>Header Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\multiboot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\logo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\fs\nullfs.h">
+      <Filter>Header Files\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\video\vt100.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\video\fb_font.h">
+      <Filter>Header Files\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\hardware\smbios.h">
+      <Filter>Header Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\core\cpu.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\hardware\pcicodes.h">
+      <Filter>Header Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\fs\kramdisk.h">
+      <Filter>Header Files\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\include\user\user.h">
+      <Filter>Header Files\user</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
