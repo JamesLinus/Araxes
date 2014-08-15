@@ -4,6 +4,8 @@
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
 #include <global.h>
+#include <terminal.h>
+#include <printf.h>
 
 #define IDT_ENTRIES 255
 
@@ -77,7 +79,7 @@ idt_entry idt[IDT_ENTRIES+1];
 idtr_entry idtr;
 
 isr_t idt_isr_list[IDT_ENTRIES+1];
-void idt_generic_fault(struct regs *r);
+void idt_generic_fault(struct regs* regs);
 
 void idt_generic_interrupt(void);
 
@@ -147,17 +149,24 @@ void idt_add_interrupt(int number, unsigned int base, unsigned short selector, u
 	idt[number].base_16_31 = (unsigned short)(base >> 16);
 }
 
-void idt_isr_handler(struct regs* r) {
-	isr_t isr = idt_isr_list[r->int_no];
+void idt_isr_handler(struct regs* regs) {
+		idt_generic_fault(regs);
+	isr_t isr = idt_isr_list[regs->int_no];
 	if (isr) {
-		isr(r);
+		isr(regs);
 	} else {
-		idt_generic_fault(r);
+		idt_generic_fault(regs);
 	}
 }
 
-void idt_generic_fault(struct regs* r) {
+void idt_generic_fault(struct regs* regs) {
 	asm volatile ("cli");
-	console_print("Unhandled interrupt occurred.");
-	asm volatile ("cli; hlt;");
+	current_terminal->palette = PALETTE_EGA;
+	current_terminal->color = 0x4E;
+	kprintf("Exception handler called, dumping registers:                                    ");
+	current_terminal->color = 0x1E;
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
+	current_terminal->color = 0x4E;
+	kprintf("Unhandled exception %2X occurred, error %8X.                                ", regs->int_no, regs->err_code);
+	_crash();
 }

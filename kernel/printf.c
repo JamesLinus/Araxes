@@ -98,6 +98,8 @@ int ksprintf(char* s, const char *fmt, ...) {
 
 void crash(char* file, int line, const char* fmt, ...) {
 	char buf[2048], bc[12];
+	memset(buf, 0, 2048);
+	memset(bc, 0, 12);
 	asm volatile("cli");
 	va_list args;
 	va_start(args, fmt);

@@ -44,10 +44,12 @@ void kernel_main(uint32_t magic, uint32_t multiboot)
 	}
 	gdt_initialize();
 	console_print("GDT ");
-	//idt_initialize();
+	idt_initialize();
 	console_print("IDT ");
 	console_print("\nLoaded.\n\n");
 	kprintf("Quick printf test! %#8X; 1 - 4 = %d\n", 0xC0FFEE, 1 - 4);
 	
-	crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
+	//crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
+	volatile int oops = 4 / 0;
+	kprintf("we shouldn't get here");
 }
