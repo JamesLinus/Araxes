@@ -38,5 +38,5 @@ void kernel_main(uint32_t magic, uint32_t multiboot)
 	//idt_initialize();
 	console_print("IDT ");
 	console_print("\nLoaded.\n\n");
-	kprintf("Quick printf test! 0x%8X; 1 - 4 = %d\n", 0xC0FFEE, 1 - 4);
+	kprintf("Quick printf test! %#8X; 1 - 4 = %d\n", 0xC0FFEE, 1 - 4);
 }

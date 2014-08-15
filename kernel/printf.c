@@ -18,7 +18,12 @@ int kvsprintf(char* str, char* fmt, va_list va) {
 			*buf++ = ch;
 		} else if (ch) {
 			int w = 0;
+			bool pf = false;
 			ch = *(fmt++);
+			if (ch == '#') {
+				pf = true;
+				ch = *(fmt++);
+			}
 			if (ch >= '0' && ch <= '9') {
 				w = ch - '0';
 				ch = *(fmt++);
@@ -40,6 +45,10 @@ int kvsprintf(char* str, char* fmt, va_list va) {
 				case 'X':
 					i = 0;
 					itoa(bf, va_arg(va, unsigned int), 16, w);
+					if (pf) {
+						*buf++ = '0';
+						*buf++ = 'x';
+					}
 					while (bf[i])
 						*buf++ = bf[i++];
 					break;
