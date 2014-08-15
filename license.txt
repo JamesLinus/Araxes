@@ -1,10 +1,10 @@
 BlacklightEVO General License
 March 13, 2013
 
-BlacklightEVO is copyright (c) 2013 The Cordilon Group. The Cordilon Group
-reserve the right to change the text and conditions of license at any time,
-with or without notice. By using this software in source code and/or binary
-form, you hereby agree to the terms and conditions of this license.
+BlacklightEVO is copyright (c) 2013-2014 The Cordilon Group. The Cordilon
+Group reserve the right to change the text and conditions of license at any
+time, with or without notice. By using this software in source code and/or
+binary form, you hereby agree to the terms and conditions of this license.
 
 You are free to modify the software for your own personal use, but may not
 distribute either the original or your modified version without express

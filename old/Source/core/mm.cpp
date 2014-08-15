@@ -1,12 +1,12 @@
-// BlacklightEVO core\mm.cpp -- memory management crap
-// Copyright (c) 2013 The Cordilon Group
+// BlacklightEVO kernel/mm.cpp -- memory management crap
+// Copyright (c) 2013-2014 The Cordilon Group -- http://www.blacklightevo.org
 // Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
-#include "global.h"
-#include "core\console.h"
-#include "core\mm.h"
-#include "hardware\uart.h"
+#include <global.h>
+//#include <console.h>
+#include <mm.h>
+//#include <hardware\uart.h>
 
 typedef struct mm_free_block {
 	size_t size;

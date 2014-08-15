@@ -17,7 +17,7 @@ License
 
 As noted at the top of all source files:
 
-    // Copyright (c) 2013 The Cordilon Group
+    // Copyright (c) 2013-2014 The Cordilon Group -- http://www.blacklightevo.org
     // Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
     // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
@@ -26,10 +26,10 @@ And as expanded in license.txt:
     BlacklightEVO General License
     March 13, 2013
     
-    BlacklightEVO is copyright (c) 2013 The Cordilon Group. The Cordilon Group
-    reserve the right to change the text and conditions of license at any time,
-    with or without notice. By using this software in source code and/or binary
-    form, you hereby agree to the terms and conditions of this license.
+    BlacklightEVO is copyright (c) 2013-2014 The Cordilon Group. The Cordilon
+    Group reserve the right to change the text and conditions of license at any
+    time, with or without notice. By using this software in source code and/or
+    binary form, you hereby agree to the terms and conditions of this license.
     
     You are free to modify the software for your own personal use, but may not
     distribute either the original or your modified version without express
@@ -57,9 +57,3 @@ And as expanded in license.txt:
     including loss of data, loss of work, or loss of physical goods. By using this
     software you admit your understanding of the lack of warranty provided with
     this software.
-=======
-BlacklightEVO
-=============
-
-A free (as in beer) operating system for x86 PCs
->>>>>>> Initial commit

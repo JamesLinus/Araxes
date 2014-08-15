@@ -1,0 +1,4 @@
+#!/bin/bash
+
+losetup /dev/loop0 evo-5G.img -o 1048576
+mount /dev/loop0 /mnt
