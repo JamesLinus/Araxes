@@ -17,15 +17,19 @@ KERNCFLAGS = -c -Ikernel/include -ffreestanding -std=gnu99 -O2 -Wall -Wextra
 KERNLDFLAGS = -T kernel/linker.ld -o $(KERNELF)
 KERNNASMFLAGS = -felf
 
+HDIMAGE = evo-5G.img
+
 .PHONY: all alliso clean kernel objects hdqemu
 .SUFFIXES: .c .asm
 
 all: kernel
 
 hdqemu: kernel
-	sudo ./mnthd
+	sudo losetup /dev/loop0 evo-5G.img -o 1048576
+	sudo mount /dev/loop0 /mnt
 	sudo cp $(KERNELF) /mnt/boot
-	sudo ./umnthd
+	sudo umount /mnt
+	sudo losetup -d /dev/loop0
 	qemu-system-i386 -m 128 -hda evo-5G.img
 
 iso:
