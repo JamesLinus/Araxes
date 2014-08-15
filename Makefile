@@ -8,7 +8,7 @@ AS = i686-elf-as
 LD = i686-elf-ld
 NASM = nasm
 
-KERNSOURCES_C := kernel/main.c kernel/global.c kernel/mm.c kernel/vga.c kernel/gdt.c kernel/idt.c
+KERNSOURCES_C := kernel/main.c kernel/global.c kernel/mm.c kernel/vga.c kernel/gdt.c kernel/idt.c kernel/printf.c
 KERNSOURCES_ASM := kernel/entry.asm kernel/isr.asm
 KERNOBJECTS := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o)
 KERNELF = kernel-i686.elf

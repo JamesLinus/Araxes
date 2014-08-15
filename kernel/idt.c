@@ -148,8 +148,7 @@ void idt_add_interrupt(int number, unsigned int base, unsigned short selector, u
 }
 
 void idt_isr_handler(struct regs* r) {
-	isr_t isr;
-	isr = idt_isr_list[r->int_no];
+	isr_t isr = idt_isr_list[r->int_no];
 	if (isr) {
 		isr(r);
 	} else {

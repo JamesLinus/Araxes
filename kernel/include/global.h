@@ -10,6 +10,15 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+// Version defines and ints
+#define KERNEL_VERSION_MAJOR 0
+#define KERNEL_VERSION_MINOR 1
+#define KERNEL_VERSION_PATCH 0
+#define KERNEL_VERSION_DEBUG 7
+
+extern char kernel_version_string[];
+void build_kernel_version_string(void);
+
 // SOMEONE KILL ME FOR THIS LATER, TIA
 #define console_print(s) vga_terminal_writestring(s)
 void vga_terminal_writestring(const char* data);
@@ -51,6 +60,7 @@ char *strtok(char *str, const char *delim);
 char *strtok_r(char * str, const char * delim, char ** saveptr);
 
 int atoi(const char * str);
+char *uitoa(char* buf, unsigned int val, int base, int min);
 char *itoa(char* buf, int val, int base, int min);
 
 void gdt_initialize(void);
