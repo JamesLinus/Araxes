@@ -14,14 +14,10 @@
 #define KERNEL_VERSION_MAJOR 0
 #define KERNEL_VERSION_MINOR 1
 #define KERNEL_VERSION_PATCH 0
-#define KERNEL_VERSION_DEBUG 7
+#define KERNEL_VERSION_DEBUG 8
 
 extern char kernel_version_string[];
 void build_kernel_version_string(void);
-
-// SOMEONE KILL ME FOR THIS LATER, TIA
-#define console_print(s) vga_terminal_writestring(s)
-void vga_terminal_writestring(const char* data);
 
 struct regs {
 	unsigned int gs, fs, es, ds;
@@ -32,7 +28,9 @@ struct regs {
 
 typedef void (*isr_t) (struct regs *);
 
-void crash(void);
+inline void _crash(void) {
+	asm volatile ("cli; hlt");
+}
 
 unsigned char inb(unsigned short port);
 void outb(unsigned short port, unsigned char data);

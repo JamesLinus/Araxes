@@ -28,7 +28,7 @@ void* sbrk(size_t size) {
 		return (void*)((unsigned int)mm_heap_end - size);
 	} else {
 		if (mm_heap_cap * 2 > 0x04000000)
-			crash(/*__FILE__, __LINE__, "sbrk(%d) exceeded mm_heap_cap, mm_heap_cap * 2 > 64 MiB.\n", size*/);
+			_crash(/*__FILE__, __LINE__, "sbrk(%d) exceeded mm_heap_cap, mm_heap_cap * 2 > 64 MiB.\n", size*/);
 		mm_heap_cap += mm_heap_cap;
 		//debug_printf(UART_BASE_RS0, DEBUG_WARNING "sbrk(%d) exceeded mm_heap_cap, doubling kernel memory size to %d MiB\n", size, mm_heap_cap >> 20);
 		return sbrk(size);

@@ -8,9 +8,10 @@
 
 #include <stdarg.h>
 
-int kvsprintf(char* str, char* fmt, va_list va);
-int kprintf(char *fmt, ...);
-int ksprintf(char* s,char *fmt, ...);
+int kvsprintf(char* str, const char* fmt, va_list va);
+int kprintf(const char *fmt, ...);
+int ksprintf(char* s, const char *fmt, ...);
+void crash(char* file, int line, const char* fmt, ...);
 
 #endif	// __KERNEL__INCLUDE__PRINTF_H
 

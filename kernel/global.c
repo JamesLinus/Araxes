@@ -6,10 +6,6 @@
 #include <global.h>
 #include <mm.h>
 
-void crash(void) {
-	__asm("cli; hlt");
-}
-
 uint64_t cpu_rdtsc()
 {
     uint64_t ret;

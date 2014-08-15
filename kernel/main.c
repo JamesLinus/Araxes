@@ -8,9 +8,14 @@
 #include <stdint.h>
 
 #include <global.h>
+#include <terminal.h>
 #include <mm.h>
 #include <vga.h>
 #include <printf.h>
+
+
+struct terminal_info default_terminal;
+struct terminal_info* current_terminal = &default_terminal;
 
 char kernel_version_string[24] = {0};
 void build_kernel_version_string(void) {
@@ -30,13 +35,19 @@ void build_kernel_version_string(void) {
 
 void kernel_main(uint32_t magic, uint32_t multiboot)
 {
+	current_terminal->textbuffer = (unsigned char*)0xB8000;		// set up default vga terminal
 	build_kernel_version_string();
-	vga_terminal_initialize();
+	vga_terminal_initialize(current_terminal, 80, 25);
 	kprintf("BlacklightEVO %s - Release 1 (EVOlution)\n", kernel_version_string);
+	
+	if (magic != 0x2BADB002) {
+	}
 	gdt_initialize();
 	console_print("GDT ");
 	//idt_initialize();
 	console_print("IDT ");
 	console_print("\nLoaded.\n\n");
 	kprintf("Quick printf test! %#8X; 1 - 4 = %d\n", 0xC0FFEE, 1 - 4);
+	
+	crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
 }

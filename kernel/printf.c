@@ -5,8 +5,9 @@
 
 #include <global.h>
 #include <printf.h>
+#include <terminal.h>
 
-int kvsprintf(char* str, char* fmt, va_list va) {
+int kvsprintf(char* str, const char* fmt, va_list va) {
 	char bf[12];
 	char ch, cj;
 	char* buf = str;
@@ -73,7 +74,7 @@ int kvsprintf(char* str, char* fmt, va_list va) {
 	return buf - str;
 }
 	
-int kprintf(char *fmt, ...) {
+int kprintf(const char *fmt, ...) {
 	char buf[2048];
 	int ret;
 	memset(buf, 0, 2048);
@@ -86,13 +87,42 @@ int kprintf(char *fmt, ...) {
 	return ret;
 }
 
-int ksprintf(char* s,char *fmt, ...) {
+int ksprintf(char* s, const char *fmt, ...) {
 	int ret;
 	va_list va;
 	va_start(va,fmt);
 	ret = kvsprintf(s, fmt, va);
 	va_end(va);
 	return ret;
+}
+
+void crash(char* file, int line, const char* fmt, ...) {
+	char buf[2048], bc[12];
+	asm volatile("cli");
+	va_list args;
+	va_start(args, fmt);
+
+	kvsprintf(buf, fmt, args);
+
+	va_end(args);
+
+	//debug_printf(UART_BASE_RS0, DEBUG_FATAL "crash()!: %s", buf);
+
+	current_terminal->palette = PALETTE_EGA;		// Swap the palette back to EGA, since we're most likely either in xterm or truecolour
+	current_terminal->color = 0x4E;					// Bright yellow on red is a good indicator something's fucked up...
+	itoa(bc, line, 10, 1);
+	console_print("\nRSoD: crash() called at ");
+	console_print(file);
+	console_print(":");
+	console_print(bc);
+	console_print(": ");
+
+	console_print(buf);
+
+	//if (CONSOLE_IS_FRAMEBUFFER)
+	//	fb_flip();									// Flip the framebuffer so we can actually display our message
+
+	_crash();
 }
 
 
