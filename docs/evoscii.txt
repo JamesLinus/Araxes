@@ -1,0 +1,16 @@
+BlacklightEVO docs/evoscii.txt -- ASCII art wordmarks
+Copyright (c) 2013-2014 The Cordilon Group -- http://www.blacklightevo.org
+Questions? Comments? Concerns? Email us: blacklight@cordilon.net
+
+  ___  _            _    _  _        _    _    _____   _____   
+ | _ )| | __ _  __ | |__| |(_) __ _ | |_ | |_ | __\ \ / / _ \  
+ | _ \| |/ _` |/ _|| / /| || |/ _` || ' \|  _|| _| \ V / (_) | 
+ |___/|_|\__,_|\__||_\_\|_||_|\__, ||_||_|\__||___| \_/ \___/  
+                              |___/  Release 1 - EVOlution     
+
+
+  _____   _____   __    
+ | __\ \ / / _ \ / _|___
+ | _| \ V / (_) |  _(_-<
+ |___| \_/ \___/|_| /__/
+
