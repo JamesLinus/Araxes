@@ -2,6 +2,7 @@
 *.img
 *.iso
 *.elf
+*.bin
 
 *~
 

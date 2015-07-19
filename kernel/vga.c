@@ -56,10 +56,10 @@ void vga_terminal_putchar(struct terminal_info* term, char c) {
 		}
 	}
 	
-	if (term->row == term->width) {
+	if (term->row == term->height) {
 		term->row--;
 		memcpy((unsigned short*)(term->textbuffer), (unsigned short*)(term->textbuffer) + term->width * 1, term->width * (term->height - 1) * 2);
-		for ( size_t x = 0; x < term->width; x++ ) {
+		for (int x = 0; x < term->width; x++) {
 			const size_t index = (term->height - 1) * term->width + x;
 			((unsigned short*)(term->textbuffer))[index] = vga_collapse(' ', term->color);
 		}

@@ -7,11 +7,13 @@
 #define __KERNEL__INCLUDE__PRINTF_H
 
 #include <stdarg.h>
+#include <terminal.h>
 
 int kvsprintf(char* str, const char* fmt, va_list va);
 int kprintf(const char *fmt, ...);
 int ksprintf(char* s, const char *fmt, ...);
 void crash(char* file, int line, const char* fmt, ...);
+int debug_printf(const char* fmt, ...);
 
 #endif	// __KERNEL__INCLUDE__PRINTF_H
 

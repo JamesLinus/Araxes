@@ -1,5 +1,5 @@
 // BlacklightEVO kernel/include/global.h -- important global includes and such
-// Copyright (c) 2013-2014 The Cordilon Group -- http://www.blacklightevo.org
+// Copyright (c) 2013-2015 The Cordilon Group -- http://www.blacklightevo.org
 // Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
@@ -10,11 +10,14 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include <mm.h>
+#include <printf.h>
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 // Version defines and ints
-#define KERNEL_VERSION_MAJOR 0
-#define KERNEL_VERSION_MINOR 1
-#define KERNEL_VERSION_PATCH 0
-#define KERNEL_VERSION_DEBUG 8
+// MOVED TO MAKEFILE
 
 extern char kernel_version_string[];
 void build_kernel_version_string(void);
@@ -30,6 +33,12 @@ typedef void (*isr_t) (struct regs *);
 
 inline void _crash(void) {
 	asm volatile ("cli; hlt");
+}
+
+inline void io_wait(void)
+{
+	asm volatile ( "outb %%al, $0x80" : : "a"(0) );
+	/* TODO: Is there any reason why al is forced? */
 }
 
 unsigned char inb(unsigned short port);
@@ -61,9 +70,9 @@ int atoi(const char * str);
 char *uitoa(char* buf, unsigned int val, int base, int min);
 char *itoa(char* buf, int val, int base, int min);
 
-void gdt_initialize(void);
+/*void gdt_initialize(void);
 void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags);
-unsigned short gdt_add_task(unsigned int base, unsigned int limit, bool kernel_mode);
+unsigned short gdt_add_task(unsigned int base, unsigned int limit, bool kernel_mode);*/
 
 void idt_initialize(void);
 void idt_add_interrupt(int number, unsigned int base, unsigned short selector, unsigned char flags);

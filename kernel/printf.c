@@ -6,10 +6,11 @@
 #include <global.h>
 #include <printf.h>
 #include <terminal.h>
+#include <hardware/uart.h>
 
 int kvsprintf(char* str, const char* fmt, va_list va) {
 	char bf[12];
-	char ch, cj;
+	char ch;
 	char* buf = str;
 	char* ss;
 	int i;
@@ -75,15 +76,17 @@ int kvsprintf(char* str, const char* fmt, va_list va) {
 }
 	
 int kprintf(const char *fmt, ...) {
-	char buf[2048];
+	//char buf[2048];
+	char* buf = (char*)malloc(2048);
 	int ret;
 	memset(buf, 0, 2048);
 	va_list va;
-	va_start(va,fmt);
+	va_start(va, fmt);
 	ret = kvsprintf(buf, fmt, va);
 	va_end(va);
 	
 	console_print(buf);
+	free(buf);
 	return ret;
 }
 
@@ -93,6 +96,24 @@ int ksprintf(char* s, const char *fmt, ...) {
 	va_start(va,fmt);
 	ret = kvsprintf(s, fmt, va);
 	va_end(va);
+	return ret;
+}
+
+int debug_printf(const char* fmt, ...) {
+	//char buf[2048];
+	char* buf = (char*)malloc(2048);
+	int ret;
+	memset(buf, 0, 2048);
+
+	va_list va;
+	va_start(va, fmt);
+
+	ret = kvsprintf(buf, fmt, va);
+	if (serial_debugging)
+		uart_print(serial_debugging, buf);
+
+	va_end(va);
+	free(buf);
 	return ret;
 }
 

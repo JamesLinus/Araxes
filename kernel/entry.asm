@@ -63,3 +63,9 @@ extern idtr
 idt_reload:
 	lidt [idtr]
 	ret
+
+
+;section .rodata
+global nasm_version_string
+nasm_version_string:
+	db "NASM ", __NASM_VER__, 0

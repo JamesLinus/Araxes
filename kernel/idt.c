@@ -7,6 +7,8 @@
 #include <terminal.h>
 #include <printf.h>
 
+#include <hardware/timer.h>
+
 #define IDT_ENTRIES 255
 
 typedef struct {
@@ -82,12 +84,26 @@ isr_t idt_isr_list[IDT_ENTRIES+1];
 void idt_generic_fault(struct regs* regs);
 
 void idt_generic_interrupt(void);
+void idt_exception_GP(struct regs* regs);
+void idt_exception_PF(struct regs* regs);
+
+void isr_irq_generic_master(struct regs* regs) {
+	debug_printf(LOG_WARNING "Recieved IRQ %d with no handler, discarding", regs->int_no - 0x20);
+	outb(0x20, 0x20);
+	return;
+}
+
+void isr_irq_generic_slave(struct regs* regs) {
+	debug_printf(LOG_WARNING "Recieved IRQ %d with no handler, discarding", regs->int_no - 0x20);
+	outb(0xA0, 0x20);
+	outb(0x20, 0x20);
+}
 
 void idt_initialize(void) {
 	memset(idt_isr_list, 0, sizeof(isr_t)*(IDT_ENTRIES+1));
 
 	idtr.base = (unsigned int)idt;
-	idtr.limit = IDT_ENTRIES+1 * 8;
+	idtr.limit = sizeof(idt);
 
 	idt_add_interrupt(0, (unsigned int)int_isr_0, gdt_kernel_cs, 0x8E);
 	idt_add_interrupt(1, (unsigned int)int_isr_1, gdt_kernel_cs, 0x8E);
@@ -139,6 +155,44 @@ void idt_initialize(void) {
 	idt_add_interrupt(47, (unsigned int)int_irq_15, gdt_kernel_cs, 0x8E);
 
 	idt_reload();
+	
+	outb(0x20, 0x11);							// Remap the IRQ table to interrupts 20 through 2F
+	io_wait();
+	outb(0xA0, 0x11);
+	io_wait();
+	outb(0x21, 0x20);
+	io_wait();
+	outb(0xA1, 0x28);
+	io_wait();
+	outb(0x21, 0x04);
+	io_wait();
+	outb(0xA1, 0x02);
+	io_wait();
+	outb(0x21, 0x01);
+	io_wait();
+	outb(0xA1, 0x01);
+	io_wait();
+	outb(0x21, 0x00);
+	outb(0xA1, 0x00);
+	
+	idt_isr_list[13] = idt_exception_GP;
+	idt_isr_list[14] = idt_exception_PF;
+	idt_isr_list[32] = isr_irq_timer;
+	idt_isr_list[33] = isr_irq_generic_master;
+	idt_isr_list[34] = isr_irq_generic_master;
+	idt_isr_list[35] = isr_irq_generic_master;
+	idt_isr_list[36] = isr_irq_generic_master;
+	idt_isr_list[37] = isr_irq_generic_master;
+	idt_isr_list[38] = isr_irq_generic_master;
+	idt_isr_list[39] = isr_irq_generic_master;
+	idt_isr_list[40] = isr_irq_generic_slave;
+	idt_isr_list[41] = isr_irq_generic_slave;
+	idt_isr_list[42] = isr_irq_generic_slave;
+	idt_isr_list[43] = isr_irq_generic_slave;
+	idt_isr_list[44] = isr_irq_generic_slave;
+	idt_isr_list[45] = isr_irq_generic_slave;
+	idt_isr_list[46] = isr_irq_generic_slave;
+	idt_isr_list[47] = isr_irq_generic_slave;
 }
 
 void idt_add_interrupt(int number, unsigned int base, unsigned short selector, unsigned char flags) {
@@ -150,7 +204,6 @@ void idt_add_interrupt(int number, unsigned int base, unsigned short selector, u
 }
 
 void idt_isr_handler(struct regs* regs) {
-		idt_generic_fault(regs);
 	isr_t isr = idt_isr_list[regs->int_no];
 	if (isr) {
 		isr(regs);
@@ -165,6 +218,36 @@ void idt_generic_fault(struct regs* regs) {
 	current_terminal->color = 0x4E;
 	kprintf("Exception handler called, dumping registers:                                    ");
 	current_terminal->color = 0x1E;
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
+	current_terminal->color = 0x4E;
+	kprintf("Unhandled exception %2X occurred, error %8X.                                ", regs->int_no, regs->err_code);
+	_crash();
+}
+
+void idt_exception_GP(struct regs* regs) {
+	asm volatile ("cli");
+	current_terminal->palette = PALETTE_EGA;
+	current_terminal->color = 0x4E;
+	kprintf("GENERAL PROTECTION FAULT, EXCEPTION 0D, CRASH TIME NOW                          ");
+	kprintf("Exception handler called, dumping registers:                                    ");
+	current_terminal->color = 0x1E;
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
+	current_terminal->color = 0x4E;
+	kprintf("Unhandled exception %2X occurred, error %8X.                                ", regs->int_no, regs->err_code);
+	_crash();
+}
+
+void idt_exception_PF(struct regs* regs) {
+	unsigned int cr2;
+	asm volatile ("cli");
+	asm volatile ("mov %%cr2, %0" : "=r"(cr2));
+	
+	current_terminal->palette = PALETTE_EGA;
+	current_terminal->color = 0x4E;
+	kprintf("PAGE FAULT, EXCEPTION 0E, CRASH TIME NOW                                        ");
+	kprintf("Exception handler called, dumping registers:                                    ");
+	current_terminal->color = 0x1E;
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
 	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
 	current_terminal->color = 0x4E;
 	kprintf("Unhandled exception %2X occurred, error %8X.                                ", regs->int_no, regs->err_code);
