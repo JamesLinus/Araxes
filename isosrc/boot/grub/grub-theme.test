@@ -1,0 +1,12 @@
+## BlacklightEVO grub-theme.cfg -- pretty little GRUB 2 menu theme
+## Copyright (c) 2013-2015 The Cordilon Group -- http://www.blacklightevo.org
+## Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
+## Questions? Comments? Concerns? Email us: blacklight@cordilon.net
+
+title-text: "BlacklightEVO Development Build 0.0.0n"
+title-color: "white"
+message-color: "white"
+message-bg-color: "white"
+desktop-color: "#111111"
+terminal-box: "terminal_box_*.png"
+
