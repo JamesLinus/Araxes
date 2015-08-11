@@ -16,6 +16,11 @@
 ## this, we redirect stderr for grub-mkrescue to iso.log, grep it for any sign
 ## of failure from xorriso, and crap out if that's the case.
 
+## There's also some custom handling for kernel/rmode.asm, which is assembled
+## as a 16-bit flat binary, included as a binary blob in kernel/entry.asm, and
+## loaded to physical address 0x3000 by the kernel if it feels it needs to
+## drop back to real mode to fill in blank spots left by the bootloader.
+
 CC = i686-elf-gcc
 AS = i686-elf-as
 LD = i686-elf-ld
@@ -23,7 +28,8 @@ NASM = nasm
 
 KERNSOURCES_C := kernel/main.c kernel/global.c kernel/mm.c kernel/vga.c kernel/gdt.c kernel/idt.c kernel/printf.c kernel/fb_font.c kernel/hardware/timer.c kernel/hardware/uart.c
 KERNSOURCES_ASM := kernel/entry.asm kernel/isr.asm
-KERNOBJECTS := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o)
+KERNOBJECTS := $(KERNSOURCES_C:.c=.o) kernel/rmode.o $(KERNSOURCES_ASM:.asm=.o)
+KERNOBJECTS_LINK := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o)
 KERNELF = evo-i686.elf
 
 KERNCFLAGS = -c -Ikernel/include -DKERNEL_VERSION_MAJOR=$(KERNEL_VERSION_MAJOR) -DKERNEL_VERSION_MINOR=$(KERNEL_VERSION_MINOR) -DKERNEL_VERSION_PATCH=$(KERNEL_VERSION_PATCH) -DKERNEL_VERSION_DEBUG=$(KERNEL_VERSION_DEBUG) -ffreestanding -std=gnu99 -O2 -Wall -Wextra
@@ -38,8 +44,27 @@ KERNEL_VERSION_DEBUG=14
 HDIMAGE = evo-6G.img
 CDIMAGE = evo.iso
 
-.PHONY: all alliso clean clean-kernel clean-boot kernel objects hd hdqemu iso isoqemu boot tools
+.PHONY: all alliso clean clean-kernel clean-boot kernel objects hd hdqemu iso isoqemu boot tools help
 .SUFFIXES: .c .asm
+
+help:
+	@echo " -- Diplaying help                                (make help)"
+	@echo
+	@echo " -- Available make targets:"
+	@echo "     - all:          'make tools boot kernel'"
+	@echo "     - tools:        Builds build assistance tools"
+	@echo "     - boot:         Builds EVOfs boot files"
+	@echo "     - kernel:       Builds BlacklightEVO kernel"
+	@echo
+	@echo "     - hd:           all + Updates hard disk image boot partition"
+	@echo "     - hdqemu:       hd + executes QEMU"
+	@echo "     - iso:          all + Creates LiveCD image
+	@echo "     - isoqemu:      iso + executes QEMU"
+	@echo
+	@echo "     - clean:        'make clean-tools clean-boot clean-kernel'"
+	@echo "     - clean-tools:  Removes build assistance tool binaries"
+	@echo "     - clean-boot:   Removes EVOfs boot file binaries"
+	@echo "     - clean-kernel: Removes BlacklightEVO kernel binaries"
 
 all: tools boot kernel
 
@@ -47,9 +72,10 @@ tools:
 	@echo " -- Building build assistance tools               (make tools)"
 	@echo "     - debugver"
 	@gcc -o tools/debugver tools/debugver.c
+	@chmod a+x tools/debugver
 
-hd: kernel
-	@echo " -- Building hard disk image boot partition       (make hd)"
+hd: all
+	@echo " -- Updating hard disk image boot partition       (make hd)"
 	@echo "     - $(KERNELF) -> isosrc/boot"
 	@cp $(KERNELF) isosrc/boot
 	@mkdir -p mnt
@@ -69,7 +95,7 @@ hdqemu: hd
 	@echo -n "     - "
 	qemu-system-i386 -m 128 -hda $(HDIMAGE) -vga std
 
-iso: kernel
+iso: all
 	@echo " -- Building LiveCD image                         (make iso)"
 	@echo "     - $(KERNELF) -> isosrc/boot"
 	@cp $(KERNELF) isosrc/boot
@@ -82,7 +108,7 @@ isoqemu: iso
 	qemu-system-i386 -m 128 -cdrom $(CDIMAGE) -vga std
 
 objects:
-	echo $(KERNOBJECTS)
+	@echo $(KERNOBJECTS)
 
 clean: clean-tools clean-boot clean-kernel
 
@@ -108,7 +134,7 @@ kernel: tools pre-kernel $(KERNELF)
 
 ## Boot code nasm, including the worst (best?) bash one-liner I've ever written
 boot:
-	@echo " -- Building boot files                           (make boot)"
+	@echo " -- Building EVOfs boot files                     (make boot)"
 	@echo "     - boot/evofs/mbr.asm"
 	@$(NASM) boot/evofs/mbr.asm
 	@echo "     - boot/evofs/vbr.asm"
@@ -118,11 +144,15 @@ boot:
 
 $(KERNELF): $(KERNOBJECTS)
 	@echo -n "     - Linking $@..."
-	@$(LD) $(KERNLDFLAGS) $(KERNOBJECTS) && echo " Done!" || echo
+	@$(LD) $(KERNLDFLAGS) $(KERNOBJECTS_LINK) && echo " Done!" || echo
+
+kernel/rmode.bin:
+	@echo "     - kernel/rmode.asm"
+	@$(NASM) -o kernel/rmode.bin kernel/rmode.asm
 
 .asm.o:
 	@echo "     - $<"
-	@$(NASM) $(KERNNASMFLAGS) -o $@ $<
+	@if [ "$<" = "kernel/rmode.asm" ]; then $(NASM) -fbin -o $@ $<; rm -f kernel/entry.o; else $(NASM) $(KERNNASMFLAGS) -o $@ $<; fi
 
 .c.o:
 	@echo "     - $<"
