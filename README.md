@@ -1,13 +1,13 @@
 BlacklightEVO Release 1 (EVOlution)
 ===================================
 
-BlacklightEVO is a free (as in beer) hobby operating system for Pentium-class and newer x86 PCs. The upcoming release, entitled EVOlution, is under active development. The operating system itself is primarily released under a proprietary permissive license (see "License").
+BlacklightEVO is a free (as in beer) hobby operating system for P6-class and newer x86 PCs. The upcoming release, codenamed EVOlution, is under active development. The operating system itself is primarily released under a proprietary permissive open source license (see "License").
 
 
 IRC
 ---
 
-A public IRC channel on Freenode called #blacklightevo is available for support, discussion, watching commits roll in, and idling. Channel rules are "keep it worksafe and relatively on-topic". If you don't have an IRC client you can use Freenode's webchat (http://webchat.freenode.net) -- please use a sensible, identifiable nick, especially if you plan to visit the channel more than once.
+A public IRC channel on Freenode called #BlacklightEVO is available for support, discussion, watching commits roll in, and idling. Channel rules are "keep it worksafe and relatively on-topic". If you don't have an IRC client you can use Freenode's webchat (http://webchat.freenode.net) -- please use a sensible, identifiable nick, especially if you plan to visit the channel more than once.
 
 Building BlacklightEVO
 ----------------------

@@ -31,13 +31,50 @@ typedef struct {
 extern gdt_entry gdt[GDT_ENTRIES];
 extern gdtr_entry gdtr;
 
+// Unmarked entries are unused.
+typedef struct {
+	unsigned int backlink;	// Backlink to the previous TSS in a hardware context switching linked list.
+	unsigned int esp0;		// Kernel mode ESP
+	unsigned int ss0;		// Kernel mode SS
+	unsigned int esp1;
+	unsigned int ss1;
+	unsigned int esp2;
+	unsigned int ss2;
+	unsigned int cr3;
+	unsigned int eip;
+	unsigned int eflags;
+	unsigned int eax;
+	unsigned int ecx;
+	unsigned int edx;
+	unsigned int ebx;
+	unsigned int esp;
+	unsigned int ebp;
+	unsigned int esi;
+	unsigned int edi;
+	unsigned int es;		// Kernel mode ES
+	unsigned int cs;		// Kernel mode CS
+	unsigned int ss;		// Kernel mode SS, again
+	unsigned int ds;		// Kernel mode DS
+	unsigned int fs;		// Kernel mode FS
+	unsigned int gs;		// Kernel mode GS
+	unsigned int ldt;
+	unsigned short reserved1;
+	unsigned short iomap_base;
+} __attribute__((packed)) tss_entry;
+
 extern bool gdt_used[GDT_ENTRIES / 2];
 extern unsigned short gdt_kernel_cs;
+extern unsigned short gdt_user_cs;
 
 extern void gdt_reload(void);	// from kernel/entry.asm
 void gdt_initialize(void);
 void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags);
 unsigned short gdt_add_task(unsigned int base, unsigned int limit, bool kernel_mode);
+
+// TSS CRUD
+
+void* tss_get_esp0(void);
+void tss_set_esp0(void* new_esp0);
 
 // PAGING CRUD
 typedef struct {

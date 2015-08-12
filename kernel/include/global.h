@@ -16,6 +16,7 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
+
 // Version defines and ints
 // MOVED TO MAKEFILE
 
@@ -35,10 +36,8 @@ inline void _crash(void) {
 	asm volatile ("cli; hlt");
 }
 
-inline void io_wait(void)
-{
+inline void io_wait(void) {
 	asm volatile ( "outb %%al, $0x80" : : "a"(0) );
-	/* TODO: Is there any reason why al is forced? */
 }
 
 unsigned char inb(unsigned short port);
@@ -50,25 +49,26 @@ void outd(unsigned short port, unsigned int data);
 
 uint64_t cpu_rdtsc();
 int memcmp(const void * s1, const void * s2,size_t n);
-void *memcpy(void *dest, const void *src, size_t n);
-void *memset(void *s, int c, size_t n);
+void* memcpy(void *dest, const void *src, size_t n);
+void* memset(void *s, int c, size_t n);
 
-char *strcat(char *dest, const char *src);
-char *strchr(const char *s, int c);
+char* strcat(char *dest, const char *src);
+char* strchr(const char *s, int c);
 int strcmp(const char * s1, const char * s2);
-char *strcpy(char *dest, const char *src);
+char* strcpy(char *dest, const char *src);
 size_t strcspn(const char *s1, const char *s2);
-char *strdup(const char* str);
+char* strdup(const char* str);
 size_t strlen(const char *s);
-char *strncpy(char *dest, const char *src, size_t n);
+char* strncpy(char *dest, const char *src, size_t n);
 size_t strspn(const char *s1, const char *s2);
-char *strstr(char *s1, const char *s2);
-char *strtok(char *str, const char *delim);
-char *strtok_r(char * str, const char * delim, char ** saveptr);
+char* strstr(char *s1, const char *s2);
+char* strtok(char *str, const char *delim);
+char* strtok_r(char * str, const char * delim, char ** saveptr);
 
 int atoi(const char * str);
-char *uitoa(char* buf, unsigned int val, int base, int min);
-char *itoa(char* buf, int val, int base, int min);
+char* u64toa(char* buf, uint64_t val, int base, int min);
+char* uitoa(char* buf, unsigned int val, int base, int min);
+char* itoa(char* buf, int val, int base, int min);
 
 /*void gdt_initialize(void);
 void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags);

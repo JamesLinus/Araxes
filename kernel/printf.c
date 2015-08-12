@@ -3,65 +3,99 @@
 // Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
+// kvsprintf supports the following specifiers:
+//  - %s	null-terminated string
+//  - %x	lowercase hexidecimal uint32_t
+//  - %X	uppercase hexidecimal uint32_t
+//  - %p	uppercase hexidecimal void* with 0x prefix
+//  - %u	decimal uint32_t
+//  - %d,i	decimal int32_t
+//  - %l	decimal uint64_t (non-standard -- should be replaced by %llu)
+//  - %c	single character
+
 #include <global.h>
 #include <printf.h>
 #include <terminal.h>
 #include <hardware/uart.h>
 
-int kvsprintf(char* str, const char* fmt, va_list va) {
-	char bf[12];
+int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
+	char tmp[22];	// Enough to hold a 64-bit unsigned integer.
 	char ch;
 	char* buf = str;
-	char* ss;
+	char* sztmp;
 	int i;
 
 	while ((ch = *(fmt++))) {
+		if ((size_t)(buf - str) == size-1)
+			ch = 0;
 		if (ch != '%') {
 			*buf++ = ch;
 		} else if (ch) {
 			int w = 0;
 			bool pf = false;
+			int length = 0;
+		nastygoto:
 			ch = *(fmt++);
 			if (ch == '#') {
 				pf = true;
 				ch = *(fmt++);
 			}
 			if (ch >= '0' && ch <= '9') {
-				w = ch - '0';
-				ch = *(fmt++);
+				w = w * 10 + (ch - '0');
+				goto nastygoto;
 			}
 			switch (ch) {
+				case 'l':
+					length++;
+					goto nastygoto;
 				case 'u':
 					i = 0;
-					uitoa(bf, va_arg(va, unsigned int), 10, w);
-					while (bf[i])
-						*buf++ = bf[i++];
+					if (length < 2)
+						uitoa(tmp, va_arg(va, unsigned int), 10, w);
+					else
+						u64toa(tmp, va_arg(va, uint64_t), 10, w);
+					while (tmp[i])
+						*buf++ = tmp[i++];
 					break;
 				case 'd':
+				case 'i':
 					i = 0;
-					itoa(bf, va_arg(va, int), 10, w);
-					while (bf[i])
-						*buf++ = bf[i++];
+					itoa(tmp, va_arg(va, int), 10, w);
+					while (tmp[i])
+						*buf++ = tmp[i++];
 					break;
 				case 'x':
 				case 'X':
 					i = 0;
-					itoa(bf, va_arg(va, unsigned int), 16, w);
+					if (length < 2)
+						uitoa(tmp, va_arg(va, unsigned int), 16, w);
+					else
+						u64toa(tmp, va_arg(va, uint64_t), 16, w);
 					if (pf) {
 						*buf++ = '0';
-						*buf++ = 'x';
+						*buf++ = (ch == 'x' ? 'x' : 'X');
 					}
-					while (bf[i])
-						*buf++ = bf[i++];
+					while (tmp[i]) {
+						*buf++ = (ch == 'x' && tmp[i] <= 'F' && tmp[i] >= 'A') ? tmp[i] + 32 : tmp[i];
+						i++;
+					}
+					break;
+				case 'p':
+					i = 0;
+					uitoa(tmp, va_arg(va, unsigned int), 16, w);
+					*buf++ = '0';
+					*buf++ = 'x';
+					while (tmp[i])
+						*buf++ = tmp[i++];
 					break;
 				case 'c':
 					*buf++ = (char)(va_arg(va, int));
 					break;
 				case 's':
 					i = 0;
-					ss = va_arg(va, char*);
-					while (ss[i])
-						*buf++ = ss[i++];
+					sztmp = va_arg(va, char*);
+					while (sztmp[i])
+						*buf++ = sztmp[i++];
 					break;
 				case '%':
 					*buf++ = ch;
@@ -82,7 +116,7 @@ int kprintf(const char *fmt, ...) {
 	memset(buf, 0, 2048);
 	va_list va;
 	va_start(va, fmt);
-	ret = kvsprintf(buf, fmt, va);
+	ret = kvsnprintf(buf, 2048, fmt, va);
 	va_end(va);
 	
 	console_print(buf);
@@ -90,16 +124,16 @@ int kprintf(const char *fmt, ...) {
 	return ret;
 }
 
-int ksprintf(char* s, const char *fmt, ...) {
+int ksnprintf(char* s, size_t size, const char *fmt, ...) {
 	int ret;
 	va_list va;
 	va_start(va,fmt);
-	ret = kvsprintf(s, fmt, va);
+	ret = kvsnprintf(s, size, fmt, va);
 	va_end(va);
 	return ret;
 }
 
-int debug_printf(const char* fmt, ...) {
+int _debug_printf(const char* fmt, ...) {
 	//char buf[2048];
 	char* buf = (char*)malloc(2048);
 	int ret;
@@ -108,7 +142,7 @@ int debug_printf(const char* fmt, ...) {
 	va_list va;
 	va_start(va, fmt);
 
-	ret = kvsprintf(buf, fmt, va);
+	ret = kvsnprintf(buf, 2048, fmt, va);
 	if (serial_debugging)
 		uart_print(serial_debugging, buf);
 
@@ -125,7 +159,7 @@ void crash(char* file, int line, const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 
-	kvsprintf(buf, fmt, args);
+	kvsnprintf(buf, 2048, fmt, args);
 
 	va_end(args);
 

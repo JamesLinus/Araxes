@@ -40,7 +40,7 @@ void build_kernel_version_string(void) {
 	}
 }
 
-void kernel_main(uint32_t magic, multiboot_info_t* multiboot)
+void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int oldmagic)
 {
 	current_terminal->textbuffer = (unsigned char*)0xB8000;		// set up default vga terminal
 	build_kernel_version_string();
@@ -48,8 +48,12 @@ void kernel_main(uint32_t magic, multiboot_info_t* multiboot)
 	kprintf("BlacklightEVO %s - Release 1 (EVOlution)\n", kernel_version_string);
 	kprintf("Build date %s (GCC %s, %s)\n", __DATE__, __VERSION__, nasm_version_string);
 	
-	if (magic != 0x2BADB002) {
-		kprintf("Dear god why");
+	if (magic == 0x2BADB002)
+		kprintf("Image loaded via Multiboot-compatible bootloader.\n");
+	else if (magic == 0x4D525655)
+		kprintf("Image loaded via EVOboot protocol%s.\n", (oldmagic == 0x2BADB002 ? " (via Multiboot-compatible bootloader)" : ""));
+	else {
+		kprintf("FUCK: magic = 0x%8X\n", magic);
 		_crash();
 	}
 	gdt_initialize();
@@ -66,11 +70,8 @@ void kernel_main(uint32_t magic, multiboot_info_t* multiboot)
 			(serial_debugging == UART_BASE_RS3 ? "RS3" : "WTF"))));
 		uart_init_serial(serial_debugging, UART_SPEED_9600, UART_PROTOCOL_8N1);
 		kprintf("UART=%s@9600-8N1 ", whatportisit);
-		debug_printf("BlacklightEVO %s - Release 1 (EVOlution)\nDebugging on %s@9600-8N1.\n\n", kernel_version_string, whatportisit);
-		debug_printf(LOG_INFO "Test: INFO\n");
-		debug_printf(LOG_WARNING "Test: WARNING\n");
-		debug_printf(LOG_ERROR "Test: ERROR\n");
-		debug_printf(LOG_FATAL "Test: FATAL\n\n");
+		debug_printf(LOG_INFO "BlacklightEVO %s - Release 1 (EVOlution)\n", kernel_version_string);
+		debug_printf(LOG_INFO "Kernel dump console on %s@9600-8N1.\n", whatportisit);
 	}
 	
 	
@@ -94,6 +95,13 @@ void kernel_main(uint32_t magic, multiboot_info_t* multiboot)
 	console_print("PG ");
 	
 	console_print("\nLoaded.\n\n");
+	
+	kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
+	kprintf("Two formats of the same hex: %#X %#x\n", 0x2BADB002, 0x2BADB002);
+	
+	char tstr[10] = {0};
+	ksnprintf(tstr, 8, "qwertyuiop");
+	kprintf("strlen(tstr): %u - \"%s\"\n", (unsigned int)strlen(tstr), tstr);
 	
 	//crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
 	//volatile int oops = 4 / 0;

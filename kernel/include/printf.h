@@ -8,12 +8,18 @@
 
 #include <stdarg.h>
 #include <terminal.h>
+#include <global.h>
 
-int kvsprintf(char* str, const char* fmt, va_list va);
-int kprintf(const char *fmt, ...);
-int ksprintf(char* s, const char *fmt, ...);
-void crash(char* file, int line, const char* fmt, ...);
-int debug_printf(const char* fmt, ...);
+#define debug_printf(fmt, ...) _debug_printf(fmt, cpu_rdtsc()/1000000, ##__VA_ARGS__)
+
+int kvsnprintf(char* str, size_t size, const char* fmt, va_list va);
+int kprintf(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)));
+int ksnprintf(char* s, size_t size, const char *fmt, ...)
+	__attribute__ ((format (printf, 3, 4)));
+void crash(char* file, int line, const char* fmt, ...)
+	__attribute__ ((format (printf, 3, 4)));
+int _debug_printf(const char* fmt, ...);
 
 #endif	// __KERNEL__INCLUDE__PRINTF_H
 

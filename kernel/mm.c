@@ -44,7 +44,7 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 			if (!(mmap->base_addr_high) && mmap->base_addr_low >= 0x100000 && mmap->length_low < 0x100000) {
 				debug_printf(LOG_INFO "Adding to mm_phys_mmap:");
 				mm_phys_mmap[(mmap->base_addr_low) >> 20] = (unsigned char)mmap->type & 0xFF;
-				debug_printf(" m[%u]=%u\n",(mmap->base_addr_low) >> 20, mmap->type);
+				_debug_printf(" m[%u]=%u\n",(mmap->base_addr_low) >> 20, mmap->type);
 			}
 			else if (!(mmap->base_addr_high) && mmap->base_addr_low >= 0x100000) {
 				unsigned int mem_size = mmap->length_low & 0xFFF00000;
@@ -52,16 +52,16 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 				while (mem_size) {
 					mem_size -= 0x100000;
 					mm_phys_mmap[(mmap->base_addr_low + mem_size) >> 20] = (unsigned char)mmap->type & 0xFF;
-					debug_printf(" m[%u]=%u",(mmap->base_addr_low + mem_size) >> 20, mmap->type);
+					//_debug_printf(" m[%u]=%u",(mmap->base_addr_low + mem_size) >> 20, mmap->type);
 				}
-				debug_printf("\n");
+				_debug_printf("\n");
 				if (mmap->type == 1)
 					usable_memory += mmap->length_low;
 			}
 			else if (!(mmap->base_addr_high) && mmap->base_addr_low < 0x100000 && mmap->type == 1)
 				usable_low_memory += mmap->length_low;
 		}
-		kprintf(" | 0x%8X%8X | 0x%8X%8X | 0x%2X |\n", mmap->base_addr_high, mmap->base_addr_low, mmap->length_high, mmap->length_low, mmap->type);
+		kprintf(" | 0x%8X%8X | 0x%8X%8X | 0x%2X |\n", (unsigned int)mmap->base_addr_high, (unsigned int)mmap->base_addr_low, (unsigned int)mmap->length_high, (unsigned int)mmap->length_low, (unsigned int)mmap->type);
 		
 		mmap = (memory_map_t*) ( (unsigned int)mmap + mmap->size + sizeof(unsigned int) );
 	}
@@ -76,7 +76,7 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 	memset(paging_kernel_directory, 0, sizeof(page_directory));
 	paging_kernel_directory->phys_addr = (unsigned int)paging_kernel_directory->phys_tables;
 	
-	kprintf("paging_kernel_directory = %#8X\n", paging_kernel_directory);
+	kprintf("paging_kernel_directory = %p\n", paging_kernel_directory);
 	/*for (unsigned int i = 0; i < 4096; i++) {
 		if (mm_phys_mmap[i]) {
 			if (!(paging_kernel_directory->tables[i >> 2])) {
@@ -103,14 +103,14 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 				paging_kernel_directory->tables[i >> 2] = sbrk(sizeof(page_table), true);
 				memset(paging_kernel_directory->tables[i >> 2], 0, sizeof(page_table));
 				paging_kernel_directory->phys_tables[i >> 2] = ((unsigned int)paging_kernel_directory->tables[i >> 2] | 0x07);
-				//kprintf("created page table %d %#8X", i >> 2, paging_kernel_directory->tables[i >> 2]);
+				//kprintf("created page table %d 0x%8X", i >> 2, paging_kernel_directory->tables[i >> 2]);
 			}
 			//kprintf("%d=[%d][%d] - ", i, i>>2, 256 * (i & 0x03));
 			for (unsigned int j = 256 * (i & 0x03); j < (256 * (i & 0x03)) + 256; j++) {
 				//if (i==3)
 				//	kprintf("%u ", j);
 				//if (i == 0 && j == 0)
-				//	kprintf(" doing %u->%u: %#8X->%#8X ", i >> 2, j, &paging_kernel_directory->tables[i >> 2]->pages[j], *(unsigned int*)(&paging_kernel_directory->tables[i >> 2]->pages[j]));
+				//	kprintf(" doing %u->%u: 0x%8X->0x%8X ", i >> 2, j, &paging_kernel_directory->tables[i >> 2]->pages[j], *(unsigned int*)(&paging_kernel_directory->tables[i >> 2]->pages[j]));
 				paging_kernel_directory->tables[i >> 2]->pages[j].present = 1;
 				paging_kernel_directory->tables[i >> 2]->pages[j].rw = 1;
 				paging_kernel_directory->tables[i >> 2]->pages[j].user = 1;
@@ -118,9 +118,9 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 				//paging_kernel_directory->tables[i >> 2]->pages[j].frame = (unsigned int)((((unsigned int)i << 20) + ((unsigned int)(j%256) << 12)) >> 12);
 				paging_kernel_directory->tables[i >> 2]->pages[j].frame = (unsigned int)(i * 256 + j%256);
 				//if (i == 3 && j == 1022)
-				//	kprintf(" doing %u->%u: %#8X->%#8X ", i >> 2, j, &paging_kernel_directory->tables[i >> 2]->pages[j], *(unsigned int*)(&paging_kernel_directory->tables[i >> 2]->pages[j]));
+				//	kprintf(" doing %u->%u: 0x%8X->0x%8X ", i >> 2, j, &paging_kernel_directory->tables[i >> 2]->pages[j], *(unsigned int*)(&paging_kernel_directory->tables[i >> 2]->pages[j]));
 				//if (i == 3 && j == 1022)
-				//	kprintf(" doing %u->%u: %#8X->%#8X ", i >> 2, j+1, &paging_kernel_directory->tables[i >> 2]->pages[j+1], *(unsigned int*)(&paging_kernel_directory->tables[i >> 2]->pages[j+1]));
+				//	kprintf(" doing %u->%u: 0x%8X->0x%8X ", i >> 2, j+1, &paging_kernel_directory->tables[i >> 2]->pages[j+1], *(unsigned int*)(&paging_kernel_directory->tables[i >> 2]->pages[j+1]));
 			}
 		}
 	}
@@ -129,19 +129,19 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 	//   -this function
 	
 	/*kprintf("\n");
-	//kprintf("%#8X\n", (unsigned int)((4 >> 2 << 20) + (0 << 12) >> 12) << 12);
-	kprintf("paging_kernel_directory->tables[0]->pages[0]    = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[0]));
-	kprintf("paging_kernel_directory->tables[0]->pages[1]    = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1]));
-	kprintf("paging_kernel_directory->tables[0]->pages[255]  = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[255]));
-	kprintf("paging_kernel_directory->tables[0]->pages[256]  = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[256]));
-	kprintf("paging_kernel_directory->tables[0]->pages[512]  = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[512]));
-	kprintf("paging_kernel_directory->tables[0]->pages[768]  = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[768]));
-	kprintf("paging_kernel_directory->tables[0]->pages[1020] = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1020]));
-	kprintf("paging_kernel_directory->tables[0]->pages[1021] = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1021]));
-	kprintf("paging_kernel_directory->tables[0]->pages[1022] = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1022]));
-	kprintf("paging_kernel_directory->tables[0]->pages[1023] = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1023]));
-	kprintf("paging_kernel_directory->tables[1]->pages[0]    = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[1]->pages[0]));
-	kprintf("paging_kernel_directory->tables[1]->pages[256]  = %#8X\n", *(unsigned int*)(&paging_kernel_directory->tables[1]->pages[256]));*/
+	//kprintf("0x%8X\n", (unsigned int)((4 >> 2 << 20) + (0 << 12) >> 12) << 12);
+	kprintf("paging_kernel_directory->tables[0]->pages[0]    = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[0]));
+	kprintf("paging_kernel_directory->tables[0]->pages[1]    = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1]));
+	kprintf("paging_kernel_directory->tables[0]->pages[255]  = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[255]));
+	kprintf("paging_kernel_directory->tables[0]->pages[256]  = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[256]));
+	kprintf("paging_kernel_directory->tables[0]->pages[512]  = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[512]));
+	kprintf("paging_kernel_directory->tables[0]->pages[768]  = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[768]));
+	kprintf("paging_kernel_directory->tables[0]->pages[1020] = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1020]));
+	kprintf("paging_kernel_directory->tables[0]->pages[1021] = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1021]));
+	kprintf("paging_kernel_directory->tables[0]->pages[1022] = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1022]));
+	kprintf("paging_kernel_directory->tables[0]->pages[1023] = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[0]->pages[1023]));
+	kprintf("paging_kernel_directory->tables[1]->pages[0]    = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[1]->pages[0]));
+	kprintf("paging_kernel_directory->tables[1]->pages[256]  = 0x%8X\n", *(unsigned int*)(&paging_kernel_directory->tables[1]->pages[256]));*/
 
 }
 

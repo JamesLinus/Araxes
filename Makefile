@@ -33,13 +33,13 @@ KERNOBJECTS_LINK := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o)
 KERNELF = evo-i686.elf
 
 KERNCFLAGS = -c -Ikernel/include -DKERNEL_VERSION_MAJOR=$(KERNEL_VERSION_MAJOR) -DKERNEL_VERSION_MINOR=$(KERNEL_VERSION_MINOR) -DKERNEL_VERSION_PATCH=$(KERNEL_VERSION_PATCH) -DKERNEL_VERSION_DEBUG=$(KERNEL_VERSION_DEBUG) -ffreestanding -std=gnu99 -O2 -Wall -Wextra
-KERNLDFLAGS = -T kernel/linker.ld -o $(KERNELF)
+KERNLDFLAGS = -L/home/kazinsal/opt/cross/lib/gcc/i686-elf/4.8.2/ -T kernel/linker.ld -o $(KERNELF)
 KERNNASMFLAGS = -felf
 
 KERNEL_VERSION_MAJOR=0
 KERNEL_VERSION_MINOR=0
 KERNEL_VERSION_PATCH=0
-KERNEL_VERSION_DEBUG=14
+KERNEL_VERSION_DEBUG=18
 
 HDIMAGE = evo-6G.img
 CDIMAGE = evo.iso
@@ -144,7 +144,7 @@ boot:
 
 $(KERNELF): $(KERNOBJECTS)
 	@echo -n "     - Linking $@..."
-	@$(LD) $(KERNLDFLAGS) $(KERNOBJECTS_LINK) && echo " Done!" || echo
+	@$(LD) $(KERNLDFLAGS) $(KERNOBJECTS_LINK) -lgcc && echo " Done!" || echo
 
 kernel/rmode.bin:
 	@echo "     - kernel/rmode.asm"
