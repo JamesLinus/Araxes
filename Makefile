@@ -26,6 +26,11 @@ AS = i686-elf-as
 LD = i686-elf-ld
 NASM = nasm
 
+## This is pretty much because my cross-toolchain is broken and rebuilding it
+## doesn't seem to fix it. Unless you happen to be the only other Kazinsal on
+## the internet, you'll want to change this.
+LIBGCC_DIR = /home/kazinsal/opt/cross/lib/gcc/i686-elf/4.8.2/ 
+
 KERNSOURCES_C := kernel/main.c kernel/global.c kernel/mm.c kernel/vga.c kernel/gdt.c kernel/idt.c kernel/printf.c kernel/fb_font.c kernel/hardware/timer.c kernel/hardware/uart.c
 KERNSOURCES_ASM := kernel/entry.asm kernel/isr.asm
 KERNOBJECTS := $(KERNSOURCES_C:.c=.o) kernel/rmode.o $(KERNSOURCES_ASM:.asm=.o)
@@ -33,7 +38,7 @@ KERNOBJECTS_LINK := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o)
 KERNELF = evo-i686.elf
 
 KERNCFLAGS = -c -Ikernel/include -DKERNEL_VERSION_MAJOR=$(KERNEL_VERSION_MAJOR) -DKERNEL_VERSION_MINOR=$(KERNEL_VERSION_MINOR) -DKERNEL_VERSION_PATCH=$(KERNEL_VERSION_PATCH) -DKERNEL_VERSION_DEBUG=$(KERNEL_VERSION_DEBUG) -ffreestanding -std=gnu99 -O2 -Wall -Wextra
-KERNLDFLAGS = -L/home/kazinsal/opt/cross/lib/gcc/i686-elf/4.8.2/ -T kernel/linker.ld -o $(KERNELF)
+KERNLDFLAGS = -L$(LIBGCC_DIR) -T kernel/linker.ld -o $(KERNELF)
 KERNNASMFLAGS = -felf
 
 KERNEL_VERSION_MAJOR=0
