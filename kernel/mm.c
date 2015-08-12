@@ -12,12 +12,10 @@
 
 #define MM_DEBUG 0
 
-//static mm_free_block mm_free_block_list_head = { 0, 0 };
 static const size_t overhead = sizeof(size_t);
 static const size_t align_to = 16;
 
-//void* mm_kernel_end_palign = (void*)(((unsigned int)&kernel_end & 0xFFFFF000) + 0x1000);
-void* mm_heap_end = (void*)((unsigned int)&kernel_end/* + 0x100000*/);
+void* mm_heap_end = (void*)((unsigned int)&kernel_end);
 unsigned int mm_heap_cap = 0x01000000;
 
 void* mm_start_of_memory =	(void*)0x00100000;		// PRETEND DAMMIT
@@ -170,33 +168,9 @@ void* sbrk(size_t size, bool page_align) {
 	}
 }
 
-/*void* malloc(size_t size) {
-	size = (size + sizeof(size_t) + (align_to - 1)) & ~ (align_to - 1);
-	mm_free_block* block = mm_free_block_list_head.next;
-	mm_free_block** head = &(mm_free_block_list_head.next);
-	while (block != 0) {
-		if (block->size >= size) {
-			*head = block->next;
-			return ((char*)block) + sizeof(size_t);
-		}
-		head = &(block->next);
-		block = block->next;
-	}
-
-	block = (mm_free_block*)sbrk(size);
-	block->size = size;
-
-	return ((char*)block) + sizeof(size_t);
-}
-
-void free(void* ptr) {
-	if (!ptr)
-		return;
-	mm_free_block* block = (mm_free_block*)(((char*)ptr) - sizeof(size_t));
-	block->next = mm_free_block_list_head.next;
-	mm_free_block_list_head.next = block;
-}*/
-
+// A pretty strange but effective memory allocator by Kernighan and Ritchie.
+// I'm not sure how this ancient code actually works. I probably should, but
+// I'm afraid that if I try to figure out how it works, it'll stop working.
 
 typedef long Align;
 
@@ -287,12 +261,7 @@ void free(void *ap) {
 	freep = p;
 }
 
-
-			
-		
-			 
-
-
+// Not K&R, as you can probably guess.
 void* calloc(size_t number, size_t size) {
 	void* ptr = malloc(number * size);
 	if (!ptr)

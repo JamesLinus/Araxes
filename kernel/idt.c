@@ -84,6 +84,7 @@ isr_t idt_isr_list[IDT_ENTRIES+1];
 void idt_generic_fault(struct regs* regs);
 
 void idt_generic_interrupt(void);
+void idt_exception_DE(struct regs* regs);
 void idt_exception_GP(struct regs* regs);
 void idt_exception_PF(struct regs* regs);
 
@@ -175,6 +176,7 @@ void idt_initialize(void) {
 	outb(0x21, 0x00);
 	outb(0xA1, 0x00);
 	
+	idt_isr_list[0]  = idt_exception_DE;
 	idt_isr_list[13] = idt_exception_GP;
 	idt_isr_list[14] = idt_exception_PF;
 	idt_isr_list[32] = isr_irq_timer;
@@ -214,26 +216,46 @@ void idt_isr_handler(struct regs* regs) {
 
 void idt_generic_fault(struct regs* regs) {
 	asm volatile ("cli");
+	char eflags[33];
+	uitoa(eflags, regs->eflags, 2, 32);
+	
 	current_terminal->palette = PALETTE_EGA;
 	current_terminal->color = 0x4E;
 	kprintf("Exception handler called, dumping registers:                                    ");
 	current_terminal->color = 0x1E;
-	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  SS: %4X  ESP: %8X  EBP: %8X  EFLAGS: %s", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip, regs->ss, regs->esp, regs->ebp, eflags);
 	current_terminal->color = 0x4E;
 	kprintf("Unhandled exception %2X occurred, error %8X.                                ", regs->int_no, regs->err_code);
 	_crash();
 }
 
-void idt_exception_GP(struct regs* regs) {
+void idt_exception_DE(struct regs* regs) {
 	asm volatile ("cli");
+	char eflags[33];
+	uitoa(eflags, regs->eflags, 2, 32);
+	
 	current_terminal->palette = PALETTE_EGA;
 	current_terminal->color = 0x4E;
-	kprintf("GENERAL PROTECTION FAULT, EXCEPTION 0D, CRASH TIME NOW                          ");
 	kprintf("Exception handler called, dumping registers:                                    ");
 	current_terminal->color = 0x1E;
-	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  SS: %4X  ESP: %8X  EBP: %8X  EFLAGS: %s", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip, regs->ss, regs->esp, regs->ebp, eflags);
 	current_terminal->color = 0x4E;
-	kprintf("Unhandled exception %2X occurred, error %8X.                                ", regs->int_no, regs->err_code);
+	kprintf("Divide error occurred in kernel, error %8X. System halted.                 ", regs->err_code);
+	_crash();
+}
+
+void idt_exception_GP(struct regs* regs) {
+	asm volatile ("cli");
+	char eflags[33];
+	uitoa(eflags, regs->eflags, 2, 32);
+	
+	current_terminal->palette = PALETTE_EGA;
+	current_terminal->color = 0x4E;
+	kprintf("Exception handler called, dumping registers:                                    ");
+	current_terminal->color = 0x1E;
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  SS: %4X  ESP: %8X  EBP: %8X  EFLAGS: %s", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip, regs->ss, regs->esp, regs->ebp, eflags);
+	current_terminal->color = 0x4E;
+	kprintf("General protection fault occurred in kernel, error %8X. System halted.     ", regs->err_code);
 	_crash();
 }
 
@@ -241,15 +263,16 @@ void idt_exception_PF(struct regs* regs) {
 	unsigned int cr2;
 	asm volatile ("cli");
 	asm volatile ("mov %%cr2, %0" : "=r"(cr2));
+	char eflags[33];
+	uitoa(eflags, regs->eflags, 2, 32);
 	
 	current_terminal->palette = PALETTE_EGA;
 	current_terminal->color = 0x4E;
-	kprintf("PAGE FAULT, EXCEPTION 0E, CRASH TIME NOW                                        ");
 	kprintf("Exception handler called, dumping registers:                                    ");
 	current_terminal->color = 0x1E;
-	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
-	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  ", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip);
+	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  SS: %4X  ESP: %8X  EBP: %8X  EFLAGS: %s", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip, regs->ss, regs->esp, regs->ebp, eflags);
+	kprintf("CR2: %8X                                                                   ", cr2);
 	current_terminal->color = 0x4E;
-	kprintf("Unhandled exception %2X occurred, error %8X.                                ", regs->int_no, regs->err_code);
+	kprintf("Page fault occured in kernel, error %8X. System halted.                    ", regs->err_code);
 	_crash();
 }
