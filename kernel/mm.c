@@ -10,6 +10,8 @@
 //#include <hardware\uart.h>
 #include <multiboot.h>
 
+#define MM_DEBUG 0
+
 //static mm_free_block mm_free_block_list_head = { 0, 0 };
 static const size_t overhead = sizeof(size_t);
 static const size_t align_to = 16;
@@ -35,9 +37,11 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 	memset(mm_phys_mmap, 0, 4096);
 	mm_phys_mmap[0] = 0xFF;
 	
+#if MM_DEBUG
 	kprintf("\nWe have a multiboot memory map:\n");
 	kprintf(" --------------------------------------------------\n");
 	kprintf(" | Address            | Length             | Type |\n");
+#endif
 		
 	while(mmap < (memory_map_t*)(multiboot->mmap_addr + multiboot->mmap_length)) {
 		if (mmap->type) {
@@ -61,14 +65,18 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 			else if (!(mmap->base_addr_high) && mmap->base_addr_low < 0x100000 && mmap->type == 1)
 				usable_low_memory += mmap->length_low;
 		}
+#if MM_DEBUG
 		kprintf(" | 0x%8X%8X | 0x%8X%8X | 0x%2X |\n", (unsigned int)mmap->base_addr_high, (unsigned int)mmap->base_addr_low, (unsigned int)mmap->length_high, (unsigned int)mmap->length_low, (unsigned int)mmap->type);
+#endif
 		
 		mmap = (memory_map_t*) ( (unsigned int)mmap + mmap->size + sizeof(unsigned int) );
 	}
+#if MM_DEBUG
 	kprintf(" --------------------------------------------------\n");
 	kprintf(" Usable memory below 1 MiB: %u KiB (%u pages)\n", usable_low_memory / 1024, usable_low_memory / 4096);
 	kprintf(" Usable memory above 1 MiB: %u KiB (%u pages)\n", usable_memory / 1024, usable_memory / 4096);
 	kprintf(" Usable memory (total):     %u KiB (%u pages)\n\n", (usable_low_memory + usable_memory) / 1024, (usable_low_memory + usable_memory) / 4096);
+#endif
 	
 	kprintf("CREATING PAGE TABLES\n");
 	

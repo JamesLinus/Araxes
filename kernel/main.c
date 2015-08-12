@@ -18,6 +18,8 @@
 #include <hardware/timer.h>
 #include <hardware/uart.h>
 
+#define EVOBOOT_BOOTLOADER_MAGIC 0x4D525655
+
 unsigned short serial_debugging = UART_BASE_RS0;	// can be a port base or 0 for don't enable
 extern const char nasm_version_string[];
 
@@ -48,10 +50,10 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	kprintf("BlacklightEVO %s - Release 1 (EVOlution)\n", kernel_version_string);
 	kprintf("Build date %s (GCC %s, %s)\n", __DATE__, __VERSION__, nasm_version_string);
 	
-	if (magic == 0x2BADB002)
+	if (magic == MULTIBOOT_BOOTLOADER_MAGIC)
 		kprintf("Image loaded via Multiboot-compatible bootloader.\n");
-	else if (magic == 0x4D525655)
-		kprintf("Image loaded via EVOboot protocol%s.\n", (oldmagic == 0x2BADB002 ? " (via Multiboot-compatible bootloader)" : ""));
+	else if (magic == EVOBOOT_BOOTLOADER_MAGIC)
+		kprintf("Image loaded via EVOboot protocol%s.\n", (oldmagic == MULTIBOOT_BOOTLOADER_MAGIC ? " (via Multiboot-compatible bootloader)" : ""));
 	else {
 		kprintf("FUCK: magic = 0x%8X\n", magic);
 		_crash();
@@ -74,10 +76,22 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		debug_printf(LOG_INFO "Kernel dump console on %s@9600-8N1.\n", whatportisit);
 	}
 	
+	kprintf("\nmm_heap_end = %8p\n", mm_heap_end);
+	
+	if (multiboot->flags & MULTIBOOT_INFO_MODS) {
+		kprintf("We have %d modules! What are they? Let's find out:\n", multiboot->mods_count);
+		multiboot_module_t* mod = (multiboot_module_t*)multiboot->mods_addr;
+		for (int i = 0; i < (int)multiboot->mods_count; i++) {
+			size_t mod_length = mod[i].mod_end - mod[i].mod_start;
+			kprintf(" - Module %d: %s - start %p, end %p, length %p\n", i, (char*)mod[i].cmdline ? (char*)mod[i].cmdline : "none", (void*)mod[i].mod_start, (void*)mod[i].mod_end, (void*)mod_length);
+			mm_heap_end += (mod_length % 0x1000 ? (mod_length & 0xFFFFF000) + 0x1000 : mod_length);
+			kprintf("   mm_heap_end = %8p\n", mm_heap_end);
+		}
+	}
 	
 	//kprintf("Quick printf test! %#8X; 1 - 4 = %d\n", 0xC0FFEE, 1 - 4);
 	
-	if (!(multiboot->flags & 1<<6)) {
+	if (!(multiboot->flags & MULTIBOOT_INFO_MEM_MAP)) {
 		kprintf("\n\nFUCK: We didn't get a memory map. We need a memory map.");
 		_crash();
 	}
@@ -91,6 +105,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	kprintf("mm_heap_end = %#8X\n", mm_heap_end);*/
 	
 	mm_create_mmap(multiboot);
+	kprintf("mm_heap_end = %8p\n", mm_heap_end);
 	paging_set_directory(paging_kernel_directory);
 	console_print("PG ");
 	
@@ -101,7 +116,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	
 	char tstr[10] = {0};
 	ksnprintf(tstr, 8, "qwertyuiop");
-	kprintf("strlen(tstr): %u - \"%s\"\n", (unsigned int)strlen(tstr), tstr);
+	kprintf("strlen(tstr): %u - \"%s\"\n\n", (unsigned int)strlen(tstr), tstr);
 	
 	//crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
 	//volatile int oops = 4 / 0;
