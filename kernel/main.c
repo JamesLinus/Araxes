@@ -109,7 +109,9 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	kprintf("strlen(tstr): %u - \"%s\"\n\n", (unsigned int)strlen(tstr), tstr);
 	
 	//crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
-	volatile int oops = 4 / 0;
+	int* unmapped = (int*)0x78901234;
+	*unmapped = 0xCAFEDEAD;
+	kprintf("%d",*unmapped);
 	//kprintf("we shouldn't get here");
 	for (;;);
 }

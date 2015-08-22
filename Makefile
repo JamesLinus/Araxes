@@ -31,7 +31,7 @@ NASM = nasm
 ## the internet, you'll want to change this.
 LIBGCC_DIR = /home/kazinsal/opt/cross/lib/gcc/i686-elf/4.8.2/ 
 
-KERNSOURCES_C := kernel/main.c kernel/global.c kernel/mm.c kernel/vga.c kernel/gdt.c kernel/idt.c kernel/printf.c kernel/fb_font.c kernel/hardware/timer.c kernel/hardware/uart.c
+KERNSOURCES_C := kernel/main.c kernel/global.c kernel/mm.c kernel/vga.c kernel/gdt.c kernel/idt.c kernel/printf.c kernel/fb_font.c kernel/hardware/timer.c kernel/hardware/uart.c kernel/fs/mbr.c
 KERNSOURCES_ASM := kernel/entry.asm kernel/isr.asm
 KERNOBJECTS := $(KERNSOURCES_C:.c=.o) kernel/rmode.o $(KERNSOURCES_ASM:.asm=.o)
 KERNOBJECTS_LINK := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o)

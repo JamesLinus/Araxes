@@ -271,7 +271,11 @@ void idt_exception_PF(struct regs* regs) {
 	kprintf("Exception handler called, dumping registers:                                    ");
 	current_terminal->color = 0x1E;
 	kprintf("EAX: %8X  EBX: %8X  ECX: %8X  EDX: %8X  ESI: %8X       EDI: %8X  CS: %4X  DS: %4X  ES: %4X  FS: %4X  GS: %4X  EIP: %8X  SS: %4X  ESP: %8X  EBP: %8X  EFLAGS: %s", regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->cs, regs->ds, regs->es, regs->fs, regs->gs, regs->eip, regs->ss, regs->esp, regs->ebp, eflags);
-	kprintf("CR2: %8X                                                                   ", cr2);
+	int n = current_terminal->width - kprintf("CR2: %8X  - %s%s%s", cr2, (regs->err_code & 0x01 ? "present, " : "non-present, "), (regs->err_code & 0x02 ? "write fault, " : "read fault, "), (regs->err_code & 0x04 ? "user mode" : "kernel mode"));
+	char* pad = malloc(n+1);
+	memset(pad, ' ', n);
+	pad[n] = '\0';
+	kprintf("%s", pad);
 	current_terminal->color = 0x4E;
 	kprintf("Page fault occured in kernel, error %8X. System halted.                    ", regs->err_code);
 	_crash();
