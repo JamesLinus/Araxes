@@ -58,6 +58,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		kprintf("FUCK: magic = 0x%8X\n", magic);
 		_crash();
 	}
+	kprintf("multiboot structure = %8p\n", multiboot);
 	gdt_initialize();
 	console_print("GDT ");
 	idt_initialize();
@@ -76,7 +77,6 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		debug_printf(LOG_INFO "Kernel dump console on %s@9600-8N1.\n", whatportisit);
 	}
 	
-	//kprintf("\nmm_heap_end = %8p\n", mm_heap_end);
 	
 	if (multiboot->flags & MULTIBOOT_INFO_MODS) {
 		kprintf("We have %d modules! What are they? Let's find out:\n", multiboot->mods_count);
@@ -108,10 +108,12 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	ksnprintf(tstr, 8, "qwertyuiop");
 	kprintf("strlen(tstr): %u - \"%s\"\n\n", (unsigned int)strlen(tstr), tstr);
 	
+	mm_dump_phys_mmap();
+	
 	//crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
-	int* unmapped = (int*)0x78901234;
-	*unmapped = 0xCAFEDEAD;
-	kprintf("%d",*unmapped);
+	//int* unmapped = (int*)0x78901234;
+	//*unmapped = 0xCAFEDEAD;
+	//kprintf("%d",*unmapped);
 	//kprintf("we shouldn't get here");
 	for (;;);
 }

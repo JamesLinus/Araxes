@@ -122,6 +122,24 @@ void* sbrk(size_t size, bool page_align) {
 	}
 }
 
+void mm_dump_phys_mmap(void) {
+	unsigned int start = 0;
+	unsigned int type = 0;
+	int i;
+	for (i = 0; i < 4096; i++) {
+		if (mm_phys_mmap[i] == type)
+			continue;
+		else {
+			if (i) {
+				kprintf("%8p - %8p  (type %d)\n", (void*)(start*0x100000), (void*)((i-1)*0x100000+0xFFFFF), type);
+			}
+			type = mm_phys_mmap[i];
+			start = i;
+		}
+	}	
+	kprintf("%8p - %8p  (type %d)\n", (void*)(start*0x100000), (void*)((i-1)*0x100000+0xFFFFF), type);
+}
+
 // A pretty strange but effective memory allocator by Kernighan and Ritchie.
 // I'm not sure how this ancient code actually works. I probably should, but
 // I'm afraid that if I try to figure out how it works, it'll stop working.

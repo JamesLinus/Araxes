@@ -30,6 +30,7 @@ extern unsigned int mm_heap_cap;
 
 void mm_clear(void);
 void mm_create_mmap(multiboot_info_t* multiboot);
+void mm_dump_phys_mmap(void);
 
 void* sbrk(size_t size, bool page_align);
 void* malloc(size_t size);
