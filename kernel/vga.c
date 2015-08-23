@@ -28,7 +28,7 @@ void vga_terminal_initialize(struct terminal_info* term, int width, int height) 
 	}
 }
  
-inline void vga_terminal_putentryat(struct terminal_info* term, char c, uint8_t color, size_t x, size_t y)
+static inline void vga_terminal_putentryat(struct terminal_info* term, char c, uint8_t color, size_t x, size_t y)
 {
 	const size_t index = y * term->width + x;
 	((unsigned short*)(term->textbuffer))[index] = vga_collapse(c, color);

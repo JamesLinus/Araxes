@@ -32,11 +32,11 @@ struct regs {
 
 typedef void (*isr_t) (struct regs *);
 
-inline void _crash(void) {
+static inline void _crash(void) {
 	asm volatile ("cli; hlt");
 }
 
-inline void io_wait(void) {
+static inline void io_wait(void) {
 	asm volatile ( "outb %%al, $0x80" : : "a"(0) );
 }
 
