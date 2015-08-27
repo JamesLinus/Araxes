@@ -27,6 +27,9 @@ page_directory* paging_current_directory;
 unsigned int* paging_frames;
 unsigned int paging_nframes;
 
+void gdt_reload_tr(void) {
+	asm volatile ("ltr %%ax" : : "a"(gdt_user_tss));
+}
 
 void gdt_initialize(void) {
 	gdtr.base = (unsigned int)gdt;
@@ -49,8 +52,7 @@ void gdt_initialize(void) {
 	gdt_used[3] = true;		// Lock this down.
 
 	gdt_reload();	// PRAY IT DON'T GO BOOM
-	
-	asm volatile ("ltr %%ax" : : "a"(gdt_user_tss));	// It likes to go boom here too.
+	gdt_reload_tr();
 }
 
 void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags) {

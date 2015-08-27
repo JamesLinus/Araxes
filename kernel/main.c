@@ -42,7 +42,7 @@ void build_kernel_version_string(void) {
 	}
 }
 
-void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int oldmagic)
+void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int oldmagic, unsigned int pcicfg)
 {
 	current_terminal->textbuffer = (unsigned char*)0xB8000;		// set up default vga terminal
 	build_kernel_version_string();
@@ -59,6 +59,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		_crash();
 	}
 	kprintf("multiboot structure = %8p\n", multiboot);
+	kprintf("pcicfg = 0x%8X\n", pcicfg);
 	gdt_initialize();
 	console_print("GDT ");
 	idt_initialize();
@@ -101,14 +102,14 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	
 	console_print("\nLoaded.\n\n");
 	
-	kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
+	/*kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
 	kprintf("Two formats of the same hex: %#X %#x\n", 0x2BADB002, 0x2BADB002);
 	
 	char tstr[10] = {0};
 	ksnprintf(tstr, 8, "qwertyuiop");
-	kprintf("strlen(tstr): %u - \"%s\"\n\n", (unsigned int)strlen(tstr), tstr);
+	kprintf("strlen(tstr): %u - \"%s\"\n\n", (unsigned int)strlen(tstr), tstr);*/
 	
-	mm_dump_phys_mmap();
+	//mm_dump_phys_mmap();
 	
 	//crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
 	//int* unmapped = (int*)0x78901234;

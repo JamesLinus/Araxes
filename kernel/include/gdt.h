@@ -66,6 +66,7 @@ extern bool gdt_used[GDT_ENTRIES / 2];
 extern unsigned short gdt_kernel_cs;
 extern unsigned short gdt_user_cs;
 
+void gdt_reload_tr(void);
 extern void gdt_reload(void);	// from kernel/entry.asm
 void gdt_initialize(void);
 void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags);

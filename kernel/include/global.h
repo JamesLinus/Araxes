@@ -16,6 +16,9 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
+#define RMODE_CALL_VGA3 0x33414756
+#define RMODE_CALL_DOWN 0x4E574F44
+
 
 // Version defines and ints
 // MOVED TO MAKEFILE
@@ -46,6 +49,8 @@ unsigned short inw(unsigned short port);
 void outw(unsigned short port, unsigned short data);
 unsigned int ind(unsigned short port);
 void outd(unsigned short port, unsigned int data);
+
+extern unsigned int rmode_call(unsigned int magic);
 
 uint64_t cpu_rdtsc();
 int memcmp(const void * s1, const void * s2,size_t n);

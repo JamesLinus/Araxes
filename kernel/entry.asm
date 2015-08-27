@@ -7,6 +7,13 @@
 MULTIBOOT_FLAGS equ 1<<0 | 1<<1				; mb_align | mb_info
 MULTIBOOT_MAGIC equ 0x1BADB002
 MULTIBOOT_CHECKSUM equ -(MULTIBOOT_MAGIC + MULTIBOOT_FLAGS)
+
+RMGLOBAL_ENTRY	equ 0x3000
+
+RMGLOBAL_ESP	equ 0x5000
+RMGLOBAL_EBX	equ 0x5004
+RMGLOBAL_EAX	equ 0x5008
+RMGLOBAL_PCICFG	equ 0x500C
  
 ; Multiboot header
 section .multiboot
@@ -26,45 +33,72 @@ section .text
 global _entry
 _entry:
 	mov esp, entry_stack+8192
-	mov dword [0x5000], _entry
+	
+	mov esi, rmode_subkernel
+	mov edi, RMGLOBAL_ENTRY
+	mov ecx, rmode_subkernel_end-rmode_subkernel
+	rep movsb
 	
 	cmp eax, 0x2BADB002
 	jne .rmode_check
 	
-	mov dword [0x5004], ebx
-	mov dword [0x5008], eax
-	mov esi, rmode_subkernel
-	mov edi, 0x3000
-	mov ecx, rmode_subkernel_end-rmode_subkernel
-	rep movsb
+	mov dword [RMGLOBAL_EBX], ebx
+	mov dword [RMGLOBAL_EAX], eax
 	
-	mov eax, 0x3000
-	jmp eax
+	mov dword [RMGLOBAL_PCICFG], 0
+	
+	call RMGLOBAL_ENTRY
 	
 .rmode_check:
-	cmp eax, "UVRM"
+	cmp eax, 'UVRM'
 	je .kernel_go
 	
+	push eax
+	mov eax, 'VGA3'
+	call RMGLOBAL_ENTRY
+	pop eax
+	
 	mov byte [0xB8000], 'W'		; Truly the pinnacle of debugging.
+	mov byte [0xB8001], 0x4F
 	mov byte [0xB8002], 'T'
+	mov byte [0xB8003], 0x4F
 	mov byte [0xB8004], 'F'
+	mov byte [0xB8005], 0x4F
 	mov byte [0xB8006], '?'
+	mov byte [0xB8007], 0x4F
+	mov byte [0xB8008], ' '
+	mov byte [0xB8009], 0x4F
+	mov byte [0xB800A], ' '
+	mov byte [0xB800B], 0x4F
+	mov byte [0xB800C], '0'
+	mov byte [0xB800D], 0x4F
+	mov byte [0xB800E], 'x'
+	mov byte [0xB800F], 0x4F
 	
-	mov byte [0xB80A7], al
-	mov byte [0xB80A5], ah
-	shr eax, 16
-	mov byte [0xB80A3], al
-	mov byte [0xB80A1], ah
+	mov edi, 0xB8010
+	mov ecx, 8
+	mov edx, eax
 	
-	mov byte [0xB80A6], 0xDE
-	mov byte [0xB80A4], 0xDE
-	mov byte [0xB80A2], 0xDE
-	mov byte [0xB80A0], 0xDE
+.wtfloop:
+	rol edx, 4
+	mov al, dl
+	and al, 0x0F
+	cmp al, 10
+	sbb al, 0x69
+	das
+	mov byte [edi], al
+	inc edi
+	mov byte [edi], 0x4F
+	inc edi
+	loop .wtfloop
+	
 	jmp .hang
 	
 .kernel_go:
-	mov ecx, dword [0x5008]
-	mov ebx, dword [0x5004]
+	mov ecx, dword [RMGLOBAL_EAX]
+	mov ebx, dword [RMGLOBAL_EBX]
+	mov edx, dword [RMGLOBAL_PCICFG]
+	push edx
 	push ecx
 	push ebx
 	push eax
@@ -79,8 +113,8 @@ _entry:
 	jmp .hang
 	
 
-extern gdtr
 global gdt_reload
+extern gdtr
 gdt_reload:
 	lgdt [gdtr]
 	
@@ -96,6 +130,7 @@ gdt_reload:
 .flush:
 	ret
 
+
 global idt_reload
 extern idtr
 idt_reload:
@@ -103,9 +138,44 @@ idt_reload:
 	ret
 	
 
+global rmode_call
+extern gdt
+rmode_call:
+	push ebp
+	mov ebp, esp
+	
+	cli
+	mov eax, dword [ebp+8]
+	
+	call RMGLOBAL_ENTRY
+	push eax
+	
+	call gdt_reload
+	call idt_reload
+	
+	mov eax, dword [gdt+0x34]			; Clear the TSS descriptor's busy flag.
+	and ah, 0xFD
+	mov dword [gdt+0x34], eax
+	
+	mov ax, 0x33
+	ltr ax
+	
+	call idt_reload
+	
+	mov eax, cr0
+	or eax, 0x80000000
+	mov cr0, eax
+	
+	pop eax
+	sti
+	
+	mov esp, ebp
+	pop ebp
+	ret
+
 section .data
 rmode_subkernel:
-	incbin "kernel/rmode.bin"
+	incbin "kernel/rmode.o"
 rmode_subkernel_end:
 
 ;section .rodata

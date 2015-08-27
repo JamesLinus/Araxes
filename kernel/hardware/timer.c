@@ -49,8 +49,14 @@ void isr_irq_timer(/*struct regs* regs*/) {
 		//__asm sti;
 	//}
 
-	//if (timer_ticks % timer_frequency == 0)
-	//	kprintf("Tick: %u", timer_ticks);
+	if (timer_ticks % timer_frequency == 0)
+		kprintf("Tick: %u", timer_ticks);
+		
+	/*if (timer_ticks % (timer_frequency * 5) == 0) {
+		rmode_call(RMODE_CALL_DOWN);
+		kprintf("FUCK: Couldn't APM shutdown for some stupid reason.");
+		_crash();
+	}*/
 		
 	outb(0x20, 0x20);
 }
