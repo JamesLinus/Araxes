@@ -26,39 +26,39 @@ align 4
 section .entry_stack
 align 4
 entry_stack:
-	times 8192 db 0
+	times 16384 db 0
  
 ; Entry point begins here
 section .text
 global _entry
 _entry:
-	mov esp, entry_stack+8192
+	mov esp, entry_stack+16384			; Set up a kernel stack.
 	
-	mov esi, rmode_subkernel
+	mov esi, rmode_subkernel			; Copy the real mode subkernel to low memory.
 	mov edi, RMGLOBAL_ENTRY
 	mov ecx, rmode_subkernel_end-rmode_subkernel
 	rep movsb
 	
-	cmp eax, 0x2BADB002
+	cmp eax, 0x2BADB002					; If we were multibooted, we need to rmode_call().
 	jne .rmode_check
 	
-	mov dword [RMGLOBAL_EBX], ebx
+	mov dword [RMGLOBAL_EBX], ebx		; Pass our current EBX and EAX to the subkernel.
 	mov dword [RMGLOBAL_EAX], eax
 	
-	mov dword [RMGLOBAL_PCICFG], 0
+	mov dword [RMGLOBAL_PCICFG], 0		; Zeroed in case the BIOS doesn't zero low memory.
 	
-	call RMGLOBAL_ENTRY
+	call RMGLOBAL_ENTRY					; Invoke the real mode subkernel.
 	
 .rmode_check:
-	cmp eax, 'UVRM'
-	je .kernel_go
+	cmp eax, 'UVRM'						; Did the real mode subkernel return?
+	je .kernel_go						; Alternatively, were we loaded via EVOboot?
 	
-	push eax
-	mov eax, 'VGA3'
+	push eax							; If neither of those are the case, display a WTF message.
+	mov eax, 'VGA3'						; Invoke the real mode subkernel to set a VGA text mode.
 	call RMGLOBAL_ENTRY
 	pop eax
 	
-	mov byte [0xB8000], 'W'		; Truly the pinnacle of debugging.
+	mov byte [0xB8000], 'W'				; Truly the pinnacle of debugging.
 	mov byte [0xB8001], 0x4F
 	mov byte [0xB8002], 'T'
 	mov byte [0xB8003], 0x4F
@@ -79,36 +79,32 @@ _entry:
 	mov ecx, 8
 	mov edx, eax
 	
-.wtfloop:
-	rol edx, 4
+.wtfloop:								; This loop dumps EDX as hexadecimal.
+	rol edx, 4							; Fetch the next digit into AL.
 	mov al, dl
-	and al, 0x0F
-	cmp al, 10
-	sbb al, 0x69
-	das
-	mov byte [edi], al
+	and al, 0x0F						; Zero-extend the low nibble to the whole byte.
+	cmp al, 10							; CF = (AL < 10)
+	sbb al, 0x69						; AL = AL - (0x69 + CF)
+	das									; ... "Decimal Adjust after Subtraction"
+	mov byte [edi], al					; We now have the digit in ASCII in video memory.
 	inc edi
-	mov byte [edi], 0x4F
+	mov byte [edi], 0x4F				; White-on-red to inform the user this is a fatal error.
 	inc edi
 	loop .wtfloop
 	
-	jmp .hang
+	jmp .hang							; We can't proceed further. Hang.
 	
 .kernel_go:
-	mov ecx, dword [RMGLOBAL_EAX]
-	mov ebx, dword [RMGLOBAL_EBX]
-	mov edx, dword [RMGLOBAL_PCICFG]
-	push edx
-	push ecx
-	push ebx
-	push eax
-	; Jump into the kernel
-	extern kernel_main
+	push dword [RMGLOBAL_PCICFG]		; unsigned int pcicfg
+	push dword [RMGLOBAL_EAX]			; unsigned int old_magic
+	push dword [RMGLOBAL_EBX]			; multiboot_info_t* multiboot
+	push eax							; unsigned int magic
+	
+	extern kernel_main					; Jump into the kernel's main function.
 	call kernel_main
- 
-	; We shouldn't ever get here, but just in case we do somehow, lock up
-.hang:
-	cli
+	
+.hang:									; We shouldn't ever get here, but just
+	cli									; in case we do somehow, lock up.
 	hlt
 	jmp .hang
 	
@@ -116,16 +112,16 @@ _entry:
 global gdt_reload
 extern gdtr
 gdt_reload:
-	lgdt [gdtr]
+	lgdt [gdtr]							; Load the GDT pointer.
 	
-	mov ax, 0x18
+	mov ax, 0x18						; Load the kernel data selectors.
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
 	
-	jmp 0x10:.flush
+	jmp 0x10:.flush						; Load the kernel code selector.
 
 .flush:
 	ret
@@ -134,7 +130,7 @@ gdt_reload:
 global idt_reload
 extern idtr
 idt_reload:
-	lidt [idtr]
+	lidt [idtr]							; Load the IDT pointer.
 	ret
 	
 
@@ -144,30 +140,29 @@ rmode_call:
 	push ebp
 	mov ebp, esp
 	
-	cli
-	mov eax, dword [ebp+8]
+	cli									; Interrupts remain off while we're in real mode.
 	
-	call RMGLOBAL_ENTRY
-	push eax
+	mov eax, dword [ebp+8]				; unsigned int magic
+	call RMGLOBAL_ENTRY					; Invoke the real mode subkernel.
 	
-	call gdt_reload
-	call idt_reload
+	push eax							; Push the return value onto the stack just in case.
+	
+	call gdt_reload						; Load the kernel GDT.
+	call idt_reload						; Load the protected mode IDT.
 	
 	mov eax, dword [gdt+0x34]			; Clear the TSS descriptor's busy flag.
 	and ah, 0xFD
 	mov dword [gdt+0x34], eax
 	
-	mov ax, 0x33
+	mov ax, 0x33						; Load the Task Register.
 	ltr ax
 	
-	call idt_reload
-	
-	mov eax, cr0
+	mov eax, cr0						; Re-enable paging.
 	or eax, 0x80000000
 	mov cr0, eax
 	
-	pop eax
-	sti
+	pop eax								; Retrieve the return value.
+	sti									; We can safely turn interrupts back on now.
 	
 	mov esp, ebp
 	pop ebp

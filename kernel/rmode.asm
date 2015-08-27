@@ -60,7 +60,7 @@ bits 16
 	retf
 
 .flush_cs:
-	push cs
+	push cs								; CS = DS = ES = FS = GS = SS = 0
 	pop ax
 	mov ss, ax
 	mov ds, ax
@@ -68,15 +68,11 @@ bits 16
 	mov fs, ax
 	mov gs, ax
 	
-	mov sp, 0x3000
+	mov sp, 0x3000						; Start the stack right below us.
 	
-	o32 lidt [_real_idt]
+	o32 lidt [_real_idt]				; Load an IDT that points to the IVT.
 	
-	nop
-	nop
-	nop
-	
-.parse_magic:
+.parse_magic:							; switch(magic)
 	cmp edx, 'VGA3'
 	je vga_set_mode3
 	
@@ -86,7 +82,8 @@ bits 16
 	cmp edx, 0x2BADB002
 	je multiboot_fixup
 	
-	jmp return_pmode
+	jmp return_pmode					; Just return on a bad magic number.
+
 
 ;; ===========================================================================
 ;; vga_set_mode3 - set the screen to VGA mode 3 (80x25 colour text mode)
@@ -155,6 +152,7 @@ get_pci_mechanism:
 .done:
 	jmp return_pmode
 
+
 ;; ===========================================================================
 ;; return_pmode - enables 32-bit protected mode and returns to the caller
 ;; ===========================================================================
@@ -174,13 +172,14 @@ back_pmode:
 	mov gs, ax
 	mov ss, ax
 	
-	;mov eax, dword [global_pcicfg]
-	;mov dword [RMGLOBAL_PCICFG], 0x89752224
-	
 	mov eax, 'UVRM'
 	mov esp, dword [RMGLOBAL_ESP]
 	ret
+	
 
+;; ===========================================================================
+;; _real_idt, _gdt - real mode IDT, mixed mode GDT
+;; ===========================================================================
 _real_idt:
 	dw 1023
 	dd 0
@@ -192,42 +191,42 @@ _gdt:
 KRNL_CODE_SEL	EQU ($ - _gdt)
 _gdt_krnl_cs:
 	dw 0xFFFF
-	dw 0			; base; gets set above
+	dw 0
 	db 0
-	db 0x9A			; present, ring 0, code, non-conforming, readable
-	db 0xCF			; 32-bit
+	db 0x9A
+	db 0xCF
 	db 0
 
 KRNL_DATA_SEL	EQU ($ - _gdt)
 _gdt_krnl_ds:
 	dw 0xFFFF
-	dw 0			; base; gets set above
+	dw 0
 	db 0
-	db 0x92			; present, ring 0, data, expand-up, writable
+	db 0x92
 	db 0xCF
 	db 0
 
 _16BIT_CODE_SEL	EQU ($ - _gdt)
 _gdt_16bit_cs:
 	dw 0xFFFF
-	dw 0			; base; gets set above
+	dw 0
 	db 0
-	db 0x9A			; present, ring 0, code, non-conforming, readable
-	db 0			; 16-bit
+	db 0x9A
+	db 0
 	db 0
 
 _16BIT_DATA_SEL	EQU ($ - _gdt)
 _gdt_16bit_ds:
 	dw 0xFFFF
-	dw 0			; base; gets set above
+	dw 0
 	db 0
-	db 0x92			; present, ring 0, data, expand-up, writable
+	db 0x92
 	db 0
 	db 0
 _gdt_end:
 
 _gdt_ptr:
-	dw _gdt_end - _gdt - 1	; GDT limit
-	dd _gdt			; linear adr of GDT; gets set above
+	dw _gdt_end - _gdt - 1
+	dd _gdt
 
 rmode_subkernel_end:
