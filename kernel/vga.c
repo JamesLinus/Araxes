@@ -96,11 +96,11 @@ void vga_terminal_writestring(struct terminal_info* term, const char* data) {
 			for (int j = 0; j < 10; j++)
 				n[j] = 0;
 			orig_i = i;
-			debug_printf(LOG_INFO "Possible ANSI string encountered.\n");
+			//debug_printf(LOG_INFO "Possible ANSI string encountered.\n");
 			while (i++ < datalen) {
 				if (data[i] == '[') {
 					term->status = TERMINAL_STATUS_ANSI;
-					_debug_printf(LOG_INFO "Beginning ANSI processing");
+					//_debug_printf(LOG_INFO "Beginning ANSI processing");
 					continue;
 				}
 				
