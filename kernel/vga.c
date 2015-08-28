@@ -105,7 +105,7 @@ void vga_terminal_writestring(struct terminal_info* term, const char* data) {
 				}
 				
 				if (term->status == TERMINAL_STATUS_ANSI) {
-					_debug_printf(".");
+					//_debug_printf(".");
 					if (data[i] == ' ')
 						continue;		// XXX: Is this a valid way of handling whitespace?
 					else if (data[i] == ';') {
