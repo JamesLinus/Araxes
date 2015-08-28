@@ -44,19 +44,27 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 	while(mmap < (memory_map_t*)(multiboot->mmap_addr + multiboot->mmap_length)) {
 		if (mmap->type) {
 			if (!(mmap->base_addr_high) && mmap->base_addr_low >= 0x100000 && mmap->length_low < 0x100000) {
+#if MM_DEBUG
 				debug_printf(LOG_INFO "Adding to mm_phys_mmap:");
+#endif
 				mm_phys_mmap[(mmap->base_addr_low) >> 20] = (unsigned char)mmap->type & 0xFF;
+#if MM_DEBUG
 				_debug_printf(" m[%u]=%u\n",(mmap->base_addr_low) >> 20, mmap->type);
+#endif
 			}
 			else if (!(mmap->base_addr_high) && mmap->base_addr_low >= 0x100000) {
 				unsigned int mem_size = mmap->length_low & 0xFFF00000;
+#if MM_DEBUG
 				debug_printf(LOG_INFO "Adding to mm_phys_mmap:");
+#endif
 				while (mem_size) {
 					mem_size -= 0x100000;
 					mm_phys_mmap[(mmap->base_addr_low + mem_size) >> 20] = (unsigned char)mmap->type & 0xFF;
 					//_debug_printf(" m[%u]=%u",(mmap->base_addr_low + mem_size) >> 20, mmap->type);
 				}
+#if MM_DEBUG
 				_debug_printf("\n");
+#endif
 				if (mmap->type == 1)
 					usable_memory += mmap->length_low;
 			}
@@ -74,15 +82,17 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 	kprintf(" Usable memory below 1 MiB: %u KiB (%u pages)\n", usable_low_memory / 1024, usable_low_memory / 4096);
 	kprintf(" Usable memory above 1 MiB: %u KiB (%u pages)\n", usable_memory / 1024, usable_memory / 4096);
 	kprintf(" Usable memory (total):     %u KiB (%u pages)\n\n", (usable_low_memory + usable_memory) / 1024, (usable_low_memory + usable_memory) / 4096);
-#endif
 	
 	kprintf("CREATING PAGE TABLES\n");
+#endif
 	
 	paging_kernel_directory = sbrk(sizeof(page_directory), true);
 	memset(paging_kernel_directory, 0, sizeof(page_directory));
 	paging_kernel_directory->phys_addr = (unsigned int)paging_kernel_directory->phys_tables;
 	
+#if MM_DEBUG
 	kprintf("paging_kernel_directory = %p\n", paging_kernel_directory);
+#endif
 	
 	for (unsigned int i = 0; i < 4096; i++) {
 		if (mm_phys_mmap[i]) {

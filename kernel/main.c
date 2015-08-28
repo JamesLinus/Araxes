@@ -44,10 +44,9 @@ void build_kernel_version_string(void) {
 
 void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int oldmagic, unsigned int pcicfg)
 {
-	current_terminal->textbuffer = (unsigned char*)0xB8000;		// set up default vga terminal
 	build_kernel_version_string();
-	vga_terminal_initialize(current_terminal, 80, 25);
-	kprintf("BlacklightEVO %s - Release 1 (EVOlution)\n", kernel_version_string);
+	vga_terminal_initialize(current_terminal, 80, 25, (void*)0xB8000);
+	kprintf(VT100_SGR_BOLD "BlacklightEVO %s - Release 1 (EVOlution)\n" VT100_SGR_NORMAL, kernel_version_string);
 	kprintf("Build date %s (GCC %s, %s)\n", __DATE__, __VERSION__, nasm_version_string);
 	
 	if (magic == MULTIBOOT_BOOTLOADER_MAGIC)
@@ -80,11 +79,11 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	
 	
 	if (multiboot->flags & MULTIBOOT_INFO_MODS) {
-		kprintf("We have %d modules! What are they? Let's find out:\n", multiboot->mods_count);
+		//kprintf("We have %d modules! What are they? Let's find out:\n", multiboot->mods_count);
 		multiboot_module_t* mod = (multiboot_module_t*)multiboot->mods_addr;
 		for (int i = 0; i < (int)multiboot->mods_count; i++) {
 			size_t mod_length = mod[i].mod_end - mod[i].mod_start;
-			kprintf(" - Module %d: %s - start %p, end %p, length %p\n", i, (char*)mod[i].cmdline ? (char*)mod[i].cmdline : "none", (void*)mod[i].mod_start, (void*)mod[i].mod_end, (void*)mod_length);
+			//kprintf(" - Module %d: %s - start %p, end %p, length %p\n", i, (char*)mod[i].cmdline ? (char*)mod[i].cmdline : "none", (void*)mod[i].mod_start, (void*)mod[i].mod_end, (void*)mod_length);
 			mm_heap_end += (mod_length % 0x1000 ? (mod_length & 0xFFFFF000) + 0x1000 : mod_length);
 			//kprintf("   mm_heap_end = %8p\n", mm_heap_end);
 		}
@@ -100,7 +99,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	paging_set_directory(paging_kernel_directory);
 	console_print("PG ");
 	
-	console_print("\nLoaded.\n\n");
+	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL "Now with \x1B[37;1;41mA\x1B[42mN\x1B[43mS\x1B[44mI\x1B[45m \x1B[46mcolours!" VT100_SGR_NORMAL "\n:)");
 	
 	/*kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
 	kprintf("Two formats of the same hex: %#X %#x\n", 0x2BADB002, 0x2BADB002);

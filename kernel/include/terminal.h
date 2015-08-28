@@ -57,19 +57,24 @@
 #define LOG_ERROR VT100_SGR_NORMAL VT100_SGR_FG_DEFAULT VT100_SGR_BG_DEFAULT VT100_SGR_BOLD VT100_SGR_REVERSE LOG_TIME "[ERROR] "
 #define LOG_FATAL VT100_SGR_NORMAL VT100_SGR_FG_DEFAULT VT100_SGR_BG_DEFAULT VT100_SGR_BG_RED VT100_SGR_BOLD VT100_SGR_FG_YELLOW LOG_TIME "[FATAL] "	// aaaaaaaaaaaaaa
 
+#define TERMINAL_STATUS_FREE	0		// Processing output as normal.
+#define TERMINAL_STATUS_ANSI	1		// Processing an ANSI escape sequence.
+
 struct terminal_info {
 	int row, column;
 	int width, height;
-	unsigned char color;
+	unsigned char default_color, color;
 	int mode;
 	int palette;
 	unsigned int fg, bg;
 	int input;
+	int status;
 	
 	unsigned char* textbuffer, framebuffer;
-	void (*initialize)(struct terminal_info* term, int width, int height);
+	void (*initialize)(struct terminal_info* term, int width, int height, unsigned char* textbuffer);
 	void (*putchar)(struct terminal_info* term, char c);
 	void (*writestring)(struct terminal_info* term, const char* data);
+	void (*update_cursor)(struct terminal_info* term);
 };
 
 extern struct terminal_info default_terminal;
