@@ -17,6 +17,7 @@
 
 #include <hardware/timer.h>
 #include <hardware/uart.h>
+#include <vbe.h>
 
 #define EVOBOOT_BOOTLOADER_MAGIC 0x4D525655
 
@@ -100,6 +101,24 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	console_print("PG ");
 	
 	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL "Now with \x1B[37;1;41mA\x1B[42mN\x1B[43mS\x1B[44mI\x1B[45m \x1B[46mcolours!" VT100_SGR_NORMAL "\nAnd a build user/hostname!\n");
+	
+	rmode_call(RMODE_CALL_VBE0);
+	
+	if (*(unsigned char*)(RMGLOBAL_VBE_BUFFER+3) == '2')
+		kprintf("Apparently we don't have a VBE card? WTF?\n");
+	else {
+		kprintf("VBE card found:\n");
+		kprintf(" - OEM:      %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x06)));
+		kprintf(" - Vendor:   %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x16)));
+		kprintf(" - Product:  %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x1A)));
+		kprintf(" - Revision: %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x1E)));
+		unsigned short* modelist = RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x0E));
+		kprintf(" - Modelist: %p\n", modelist);
+		kprintf(" - Modes:\n");
+		vbe_get_mode_info();
+		for (int i = 0; vbe_modelist[i].mode != 0xFFFF; i++)
+			kprintf("   0x%X: %dx%dx%d (%p)\n", vbe_modelist[i].mode, vbe_modelist[i].width, vbe_modelist[i].height, vbe_modelist[i].depth, vbe_modelist[i].framebuffer);
+	}
 	
 	/*kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
 	kprintf("Two formats of the same hex: %#X %#x\n", 0x2BADB002, 0x2BADB002);

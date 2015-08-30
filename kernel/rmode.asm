@@ -3,10 +3,16 @@
 ;; Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
 ;; Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
-RMGLOBAL_ESP	equ 0x5000
-RMGLOBAL_EBX	equ 0x5004
-RMGLOBAL_EAX	equ 0x5008
-RMGLOBAL_PCICFG	equ 0x500C
+RMGLOBAL_ESP			equ 0x5000
+RMGLOBAL_EBX			equ 0x5004
+RMGLOBAL_EAX			equ 0x5008
+RMGLOBAL_PCICFG			equ 0x500C
+RMGLOBAL_VIDEO_WIDTH	equ 0x5010
+RMGLOBAL_VIDEO_HEIGHT	equ 0x5012
+RMGLOBAL_VIDEO_DEPTH	equ 0x5014
+RMGLOBAL_VIDEO_MODE		equ 0x5016
+
+RMGLOBAL_VBE_BUFFER		equ 0x5200
 
 bits 32
 org 0x3000
@@ -76,6 +82,12 @@ bits 16
 	cmp edx, 'VGA3'
 	je vga_set_mode3
 	
+	cmp edx, 'VBE0'
+	je vbe_do_4F00
+	
+	cmp edx, 'VBE1'
+	je vbe_do_4F01
+	
 	cmp edx, 'DOWN'
 	je apm_shutdown
 	
@@ -97,6 +109,44 @@ vga_set_mode3:
 	mov dx, text_palette				; We do this to turn brown into dark yellow.
 	xor bx, bx							; Brown is historically accurate, but looks
 	int 0x10							; out of place in the ANSI colour code set.
+	
+	jmp return_pmode
+
+
+;; ===========================================================================
+;; vbe_do_4F00 - calls VBE function 00h and places the result in a buffer
+;; Called with magic number 'VBE0'
+;; ===========================================================================
+vbe_do_4F00:
+	mov di, RMGLOBAL_VBE_BUFFER			; Clear the buffer of whatever was last in it.
+	mov cx, 0x200
+	mov al, 0
+	rep stosb
+	
+	mov eax, '2EBV'						; Place {'V', 'B', 'E', '2'} in the buffer.
+	mov dword [RMGLOBAL_VBE_BUFFER], eax
+	
+	mov ax, 0x4F00						; VBE Function 00h: Get SuperVGA Information
+	mov di, RMGLOBAL_VBE_BUFFER
+	int 10h
+	
+	jmp return_pmode
+
+
+;; ===========================================================================
+;; vbe_do_4F01 - calls VBE function 01h and places the result in a buffer
+;; Called with magic number 'VBE0'
+;; ===========================================================================
+vbe_do_4F01:
+	mov di, RMGLOBAL_VBE_BUFFER			; Clear the buffer of whatever was last in it.
+	mov cx, 0x200
+	mov al, 0
+	rep stosb
+	
+	mov ax, 0x4F01						; VBE Function 01h: Get SuperVGA Mode Information
+	mov cx, word [RMGLOBAL_VIDEO_MODE]
+	mov di, RMGLOBAL_VBE_BUFFER
+	int 10h
 	
 	jmp return_pmode
 

@@ -1,5 +1,5 @@
 // BlacklightEVO kernel/include/vga.h -- header for the QNS VGA terminal
-// Copyright (c) 2013-2014 The Cordilon Group -- http://www.blacklightevo.org
+// Copyright (c) 2013-2015 The Cordilon Group -- http://www.blacklightevo.org
 // Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
