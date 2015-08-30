@@ -90,8 +90,14 @@ bits 16
 ;; Called with magic number 'VGA3'
 ;; ===========================================================================
 vga_set_mode3:
-	mov ax, 0x0003
+	mov ax, 0x0003						; Do the actual mode set.
 	int 0x10
+	
+	mov ax, 0x1002						; Set all the EGA palette registers at once.
+	mov dx, text_palette				; We do this to turn brown into dark yellow.
+	xor bx, bx							; Brown is historically accurate, but looks
+	int 0x10							; out of place in the ANSI colour code set.
+	
 	jmp return_pmode
 
 
@@ -150,7 +156,7 @@ get_pci_mechanism:
 	mov byte [RMGLOBAL_PCICFG+3], dl
 
 .done:
-	jmp return_pmode
+	jmp vga_set_mode3
 
 
 ;; ===========================================================================
@@ -175,7 +181,29 @@ back_pmode:
 	mov eax, 'UVRM'
 	mov esp, dword [RMGLOBAL_ESP]
 	ret
-	
+
+
+;; ===========================================================================
+;; text_palette - an EGA/VGA text mode colour palette
+;; ===========================================================================
+text_palette:
+	db 000000b
+	db 000001b
+	db 000010b
+	db 000011b
+	db 000100b
+	db 000101b
+	db 000110b
+	db 000111b
+	db 111000b
+	db 111001b
+	db 111010b
+	db 111011b
+	db 111100b
+	db 111101b
+	db 111110b
+	db 111111b
+	db 000000b
 
 ;; ===========================================================================
 ;; _real_idt, _gdt - real mode IDT, mixed mode GDT

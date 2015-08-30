@@ -173,7 +173,7 @@ rmode_subkernel:
 	incbin "kernel/rmode.o"
 rmode_subkernel_end:
 
-;section .rodata
+section .rodata
 global nasm_version_string
 nasm_version_string:
 	db "NASM ", __NASM_VER__, 0

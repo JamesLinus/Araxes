@@ -99,7 +99,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	paging_set_directory(paging_kernel_directory);
 	console_print("PG ");
 	
-	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL "Now with \x1B[37;1;41mA\x1B[42mN\x1B[43mS\x1B[44mI\x1B[45m \x1B[46mcolours!" VT100_SGR_NORMAL "\nAnd a build user/hostname!");
+	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL "Now with \x1B[37;1;41mA\x1B[42mN\x1B[43mS\x1B[44mI\x1B[45m \x1B[46mcolours!" VT100_SGR_NORMAL "\nAnd a build user/hostname!\n");
 	
 	/*kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
 	kprintf("Two formats of the same hex: %#X %#x\n", 0x2BADB002, 0x2BADB002);
