@@ -6,7 +6,14 @@
 #include <global.h>
 #include <vbe.h>
 
+bool vbe_initialized = false;
+
 struct vbe_mode_info vbe_modelist[128];
+
+char vbe_oem[48];
+char vbe_vendor[48];
+char vbe_product[48];
+char vbe_revision[48];
 
 bool vbe_exists(void) {
 	rmode_call(RMODE_CALL_VBE0);
@@ -16,12 +23,32 @@ bool vbe_exists(void) {
 		return true;
 }
 
+bool vbe_initialize(void) {
+	if (!vbe_exists())
+		return vbe_initialized = false;
+		
+	strncpy(vbe_oem, (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x06)), 47);
+	strncpy(vbe_vendor, (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x16)), 47);
+	strncpy(vbe_product, (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x1A)), 47);
+	strncpy(vbe_revision, (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x1E)), 47);
+	
+	vbe_oem[47] = '\0';
+	vbe_vendor[47] = '\0';
+	vbe_product[47] = '\0';
+	vbe_revision[47] = '\0';
+	
+	vbe_get_mode_info();
+	
+	return vbe_initialized = true;
+}
+
 void vbe_get_mode_info(void) {
 	int i = 0;
 	int j = 0;
 	if (!vbe_exists())
 		return;
 	unsigned short* modelist = RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x0E));
+	debug_printf(LOG_INFO "[VBE] Doing mode list iteration.\n");
 	
 	for (i = 0; j < 127; i++) {
 		if (modelist[i] == 0xFFFF) {

@@ -1,17 +1,21 @@
-// BlacklightEVO kernel/printf.h -- kvsprintf and friends
-// Copyright (c) 2013-2014 The Cordilon Group -- http://www.blacklightevo.org
+// BlacklightEVO kernel/printf.h -- kvsnprintf and friends
+// Copyright (c) 2013-2015 The Cordilon Group -- http://www.blacklightevo.org
 // Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
-// kvsprintf supports the following specifiers:
+// kvsnprintf supports the following specifiers:
 //  - %s	null-terminated string
-//  - %x	lowercase hexidecimal uint32_t
-//  - %X	uppercase hexidecimal uint32_t
+//  - %x	lowercase hexidecimal unsigned integer
+//  - %X	uppercase hexidecimal unsigned integer
 //  - %p	uppercase hexidecimal void* with 0x prefix
-//  - %u	decimal uint32_t
-//  - %d,i	decimal int32_t
-//  - %l	decimal uint64_t (non-standard -- should be replaced by %llu)
+//  - %u	decimal unsigned integer
+//  - %d,i	decimal signed integer
 //  - %c	single character
+
+// kvsnprintf supports the following flags:
+//  - flags		supports #
+//  - width		currently acts as .precision
+//  - length	supports l, ll, none
 
 #include <global.h>
 #include <printf.h>

@@ -100,9 +100,12 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	paging_set_directory(paging_kernel_directory);
 	console_print("PG ");
 	
+	if (vbe_initialize())
+		console_print("VBE ");
+	
 	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL "Now with \x1B[37;1;41mA\x1B[42mN\x1B[43mS\x1B[44mI\x1B[45m \x1B[46mcolours!" VT100_SGR_NORMAL "\nAnd a build user/hostname!\n");
 	
-	rmode_call(RMODE_CALL_VBE0);
+	/*rmode_call(RMODE_CALL_VBE0);
 	
 	if (*(unsigned char*)(RMGLOBAL_VBE_BUFFER+3) == '2')
 		kprintf("Apparently we don't have a VBE card? WTF?\n");
@@ -116,9 +119,9 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		kprintf(" - Modelist: %p\n", modelist);
 		kprintf(" - Modes:\n");
 		vbe_get_mode_info();
-		for (int i = 0; vbe_modelist[i].mode != 0xFFFF; i++)
-			kprintf("   0x%X: %dx%dx%d (%p)\n", vbe_modelist[i].mode, vbe_modelist[i].width, vbe_modelist[i].height, vbe_modelist[i].depth, vbe_modelist[i].framebuffer);
-	}
+		//for (int i = 0; vbe_modelist[i].mode != 0xFFFF; i++)
+			//kprintf("   0x%X: %dx%dx%d (%p)\n", vbe_modelist[i].mode, vbe_modelist[i].width, vbe_modelist[i].height, vbe_modelist[i].depth, vbe_modelist[i].framebuffer);
+	}*/
 	
 	/*kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
 	kprintf("Two formats of the same hex: %#X %#x\n", 0x2BADB002, 0x2BADB002);

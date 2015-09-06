@@ -15,9 +15,15 @@ struct vbe_mode_info {
 	void* framebuffer;
 };
 
+extern bool vbe_initialized;
 extern struct vbe_mode_info vbe_modelist[128];
+extern char vbe_oem[48];
+extern char vbe_vendor[48];
+extern char vbe_product[48];
+extern char vbe_revision[48];
 
 bool vbe_exists(void);
+bool vbe_initialize(void);
 void vbe_get_mode_info(void);
 
 #endif	// __KERNEL__INCLUDE__VBE_H

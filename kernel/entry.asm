@@ -95,6 +95,14 @@ _entry:
 	jmp .hang							; We can't proceed further. Hang.
 	
 .kernel_go:
+	mov edx, cr0						; We need to set up the FPU properly.
+	and edx, 0xFFFFFFFB					; Ensure the FPU Emulation bit is disabled.
+	or edx, 0x22						; Set the native exception and MP flags.
+	mov cr0, edx
+	
+	fninit								; Initialize the FPU.
+	fldcw [_value_0x37A]				; Unmask invalid operand and division exceptions.
+
 	push dword [RMGLOBAL_PCICFG]		; unsigned int pcicfg
 	push dword [RMGLOBAL_EAX]			; unsigned int old_magic
 	push dword [RMGLOBAL_EBX]			; multiboot_info_t* multiboot
@@ -107,7 +115,8 @@ _entry:
 	cli									; in case we do somehow, lock up.
 	hlt
 	jmp .hang
-	
+
+_value_0x37A dw 0x37A
 
 global gdt_reload
 extern gdtr
