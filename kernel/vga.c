@@ -21,6 +21,7 @@ void vga_terminal_initialize(struct terminal_info* term, int width, int height, 
 	
 	term->initialize = vga_terminal_initialize;
 	term->putchar = vga_terminal_putchar;
+	term->write = vga_terminal_write;
 	term->writestring = vga_terminal_writestring;
 	term->update_cursor = vga_update_cursor;
 	
@@ -83,9 +84,13 @@ void vga_terminal_putchar(struct terminal_info* term, char c) {
 	if (cursor_dirty)
 		term->update_cursor(term);		// This can be slow on some VGA hardware, so do it only if necessary.
 }
- 
+
 void vga_terminal_writestring(struct terminal_info* term, const char* data) {
-	size_t datalen = strlen(data);
+	vga_terminal_write(term, data, strlen(data));
+}
+ 
+void vga_terminal_write(struct terminal_info* term, const char* data, size_t length) {
+	size_t datalen = length;
 	size_t orig_i;
 	int n_i = 0;
 	int n[10] = {0};

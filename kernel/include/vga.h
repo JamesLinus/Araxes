@@ -10,6 +10,7 @@
 
 void vga_terminal_initialize(struct terminal_info* term, int width, int height, unsigned char* textbuffer);
 void vga_terminal_putchar(struct terminal_info* term, char c);
+void vga_terminal_write(struct terminal_info* term, const char* data, size_t length);
 void vga_terminal_writestring(struct terminal_info* term, const char* data);
 void vga_update_cursor(struct terminal_info* term);
 

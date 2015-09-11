@@ -73,6 +73,7 @@ struct terminal_info {
 	unsigned char* textbuffer, framebuffer;
 	void (*initialize)(struct terminal_info* term, int width, int height, unsigned char* textbuffer);
 	void (*putchar)(struct terminal_info* term, char c);
+	void (*write)(struct terminal_info* term, const char* data, size_t length);
 	void (*writestring)(struct terminal_info* term, const char* data);
 	void (*update_cursor)(struct terminal_info* term);
 };
