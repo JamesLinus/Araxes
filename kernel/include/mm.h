@@ -12,8 +12,6 @@ typedef struct mm_free_block {
 	struct mm_free_block* next;
 } mm_free_block;
 
-/* The memory map. Be careful that the offset 0 is base_addr_low
-but no size. */
 typedef struct {
 	unsigned long size;
 	unsigned long base_addr_low;
