@@ -6,14 +6,7 @@ Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 | __\ \ / / _ \ / _|___
 | _| \ V / (_) |  _(_-<
 |___| \_/ \___/|_| /__/
- Version 1: 2015-09-21
-
-0. Abstract
-
-EVOfs is a 64-bit sector-oriented filesystem designed for hard drives. Each
-data sector in the filesystem contains the data required to determine the next
-data sector in a chain that comprises file data. The filesystem supports up to
-2**64 512-byte sectors, or 9.44 ZiB. 
+ Version 0: 10/19/2014
 
 
 1. Filesystem Structure
@@ -65,13 +58,13 @@ volume boot record, and is elaborated on in the next section.
 The Volume Boot Record contains the following filesystem data at offset 0x140:
 
 	0x140	vol_magic			uint32_t	MUST BE 0x214F5645 - "EVO!"
-	0x144	vol_size			uint64_t	Volume length in sectors
-	0x14C	vol_version			uint32_t	EVOfs version (currently 1)
-	0x150	vol_creator			uint32_t	Tools that created the volume
-	0x154	vol_data_start		uint64_t	Starting sector of the data area
-	0x15C	vol_mount_time		uint32_t	Time the volume was last mounted
-	0x160	vol_unmount_time	uint32_t	Time the volume was last unmounted
-	0x164	vol_stage2_sum		uint32_t	Checksum of stage2
+	0x144	vol_size			uint32_t	Volume length in sectors
+	0x148	vol_version			uint32_t	EVOfs version (currently 0)
+	0x14C	vol_creator			uint32_t	Tools that created the volume
+	0x150	vol_data_start		uint32_t	Starting sector of the data area
+	0x154	vol_mount_time		uint32_t	Time the volume was last mounted
+	0x158	vol_unmount_time	uint32_t	Time the volume was last unmounted
+	0x15C	vol_stage2_sum		uint32_t	Checksum of stage2
 	
 vol_creator can be any of the following:
 	0x00000000 = unknown
@@ -126,31 +119,29 @@ data section of the volume is optional.
 The data section comprises every sector in the volume after the blocktable and
 is used to store data, directories, nodes, et cetera.
 
-Each data sector begins with an 8-byte value pointing to the next data sector
-in the file or a special value to denote something else:
+Each data sector begins with a 4-byte value pointing to the next data sector in the file or a special value to denote something else:
 
-	0x0000000000000000 = no more data (last sector in the file)
-	0x0000000000000001 = fileblock (first sector of a file)
-	0x0000000000000002 through 0x0000003F = reserved
-	0x0000000000000040 through vol_data_start-1 = invalid (maps to the
-	                   blocktable)
+	0x00000000 = no more data (last sector in the file)
+	0x00000001 = fileblock (first sector of a file)
+	0x00000002 through 0x0000003F = reserved
+	0x00000040 through vol_data_start-1 = invalid (maps to the blocktable)
 
-If the data sector begins with any valid sector number/pointer (including
-0x0000000000000000), the remaining 504 bytes in the sector are used to store
-file data. Otherwise, special structures apply depending on the value.
+If the data sector begins with any valid pointer (including 0x00000000), the
+remaining 508 bytes in the sector are used to store file data. Otherwise,
+special structures apply depending on the value.
 
 
 7. Fileblocks
 
-A file information block or fileblock is a special data sector (ID 0x0000000000000001) that denotes the start of a file. Fileblocks take on the following format:
+A file information block or fileblock is a special data sector (ID 0x00000001) that denotes the start of a file. Fileblocks take on the following format:
 
-	0x000	fb_ident		uint64_t	Fileblock identifier (0x0000000000000001)
-	0x008	fb_next_sector	uint64_t	Link to the next sector in the file
-	0x010	fb_size			uint64_t	Size of the file in bytes
-	0x018	fb_flags		uint32_t	Flags for the file
-	0x01C	fb_time_create	time_t		Creation timestamp
-	0x020	fb_time_modify	time_t		Modify timestamp
-	0x024	fb_links		uint32_t	Link count (file dents pointing here)
+	0x000	fb_ident		uint32_t	Fileblock identifier (0x00000001)
+	0x004	fb_next_sector	uint32_t	Link to the next sector in the file
+	0x008	fb_size			uint32_t	Size of the file in bytes
+	0x00C	fb_flags		uint32_t	Flags for the file
+	0x010	fb_time_create	time_t		Creation timestamp
+	0x014	fb_time_modify	time_t		Modify timestamp
+	0x018	fb_links		uint32_t	Link count (file dents pointing here)
 	0x100	fb_data			256 bytes	Start of the file data
 	
 Flags:
@@ -164,5 +155,5 @@ Flags:
 Directories are files with flag 0x00000001 set, with the following format
 (repeating until end of file):
 
-	0x0000	dent_name		char[120]	Filename, null-terminated, null-padded
-	0x0078	dent_fileblock	uint64_t	Fileblock associated with the file
+	0x0000	dent_name		char[124]	Filename, null-terminated, null-padded
+	0x007C	dent_fileblock	uint32_t	Fileblock associated with the file

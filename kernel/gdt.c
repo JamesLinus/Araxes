@@ -89,7 +89,6 @@ void* tss_get_esp0(void) {
 }
 
 void tss_set_esp0(void* new_esp0) {
-	//assert((stack_pointer & 0xF) == 0);
 	tss.esp0 = (unsigned int) new_esp0;
 }
 
