@@ -14,6 +14,7 @@ RMGLOBAL_ESP	equ 0x5000
 RMGLOBAL_EBX	equ 0x5004
 RMGLOBAL_EAX	equ 0x5008
 RMGLOBAL_PCICFG	equ 0x500C
+RMGLOBAL_RETVAL	equ 0x5018
  
 ; Multiboot header
 section .multiboot

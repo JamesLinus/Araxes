@@ -7,8 +7,10 @@
 #include <vbe.h>
 
 bool vbe_initialized = false;
+bool vbe_have_edid = false;
 
 struct vbe_mode_info vbe_modelist[128];
+struct vbe_edid_info vbe_edid;
 
 char vbe_oem[48];
 char vbe_vendor[48];
@@ -38,6 +40,7 @@ bool vbe_initialize(void) {
 	vbe_revision[47] = '\0';
 	
 	vbe_get_mode_info();
+	vbe_get_edid_info();
 	
 	return vbe_initialized = true;
 }
@@ -72,4 +75,20 @@ void vbe_get_mode_info(void) {
 	}
 	
 	debug_printf(LOG_INFO "[VBE] Added %i modes to vbe_modelist.\n", j);
+}
+
+void vbe_get_edid_info(void) {
+	unsigned int rmodecall = 0;
+	unsigned char* edidbuf = (unsigned char*)RMGLOBAL_VBE_BUFFER;
+	if (!vbe_exists())
+		return;
+		
+	rmodecall = rmode_call(RMODE_CALL_EDID);
+	
+	if (rmodecall == 0x00004F00) {
+		vbe_have_edid = true;	
+		memcpy(&vbe_edid, edidbuf, 128);
+		debug_printf(LOG_INFO "[VBE] EDID information retrieved.\n");
+	} else
+		debug_printf(LOG_WARNING "[VBE] No EDID information was available, got 0x%08X.\n", rmodecall);
 }

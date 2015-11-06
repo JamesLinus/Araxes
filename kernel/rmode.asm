@@ -11,6 +11,7 @@ RMGLOBAL_VIDEO_WIDTH	equ 0x5010
 RMGLOBAL_VIDEO_HEIGHT	equ 0x5012
 RMGLOBAL_VIDEO_DEPTH	equ 0x5014
 RMGLOBAL_VIDEO_MODE		equ 0x5016
+RMGLOBAL_RETVAL			equ 0x5018
 
 RMGLOBAL_VBE_BUFFER		equ 0x5200
 
@@ -88,12 +89,16 @@ bits 16
 	cmp edx, 'VBE1'
 	je vbe_do_4F01
 	
+	cmp edx, 'EDID'
+	je vbe_do_4F15
+	
 	cmp edx, 'DOWN'
 	je apm_shutdown
 	
 	cmp edx, 0x2BADB002
 	je multiboot_fixup
 	
+	mov dword [RMGLOBAL_VBE_BUFFER], 0xFFFFFFFF
 	jmp return_pmode					; Just return on a bad magic number.
 
 
@@ -130,12 +135,14 @@ vbe_do_4F00:
 	mov di, RMGLOBAL_VBE_BUFFER
 	int 10h
 	
+	movzx eax, ax
+	mov dword [RMGLOBAL_RETVAL], eax
 	jmp return_pmode
 
 
 ;; ===========================================================================
 ;; vbe_do_4F01 - calls VBE function 01h and places the result in a buffer
-;; Called with magic number 'VBE0'
+;; Called with magic number 'VBE1'
 ;; ===========================================================================
 vbe_do_4F01:
 	mov di, RMGLOBAL_VBE_BUFFER			; Clear the buffer of whatever was last in it.
@@ -148,6 +155,49 @@ vbe_do_4F01:
 	mov di, RMGLOBAL_VBE_BUFFER
 	int 10h
 	
+	movzx eax, ax
+	mov dword [RMGLOBAL_RETVAL], eax
+	jmp return_pmode
+
+
+;; ===========================================================================
+;; vbe_do_4F02 - calls VBE function 02h and places the result in a buffer
+;; Called with magic number 'VBE2'
+;; ===========================================================================
+vbe_do_4F02:
+	mov di, RMGLOBAL_VBE_BUFFER			; Clear the buffer of whatever was last in it.
+	mov cx, 0x200
+	mov al, 0
+	rep stosb
+	
+	mov ax, 0x4F02						; VBE Function 02h: Set SuperVGA Mode
+	mov bx, word [RMGLOBAL_VIDEO_MODE]
+	int 10h
+	
+	movzx eax, ax
+	mov dword [RMGLOBAL_RETVAL], eax
+	jmp return_pmode
+
+
+;; ===========================================================================
+;; vbe_do_4F15 - calls VBE function 15h and places the result in a buffer
+;; Called with magic number 'EDID'
+;; ===========================================================================
+vbe_do_4F15:
+	mov di, RMGLOBAL_VBE_BUFFER			; Clear the buffer of whatever was last in it.
+	mov cx, 0x200
+	mov al, 0
+	rep stosb
+	
+	mov ax, 0x4F15						; VBE Function 15h: Data Display Channel
+	mov bl, 1							; Subfunction 01h: Read EDID
+	xor cx, cx
+	mov dx, cx
+	mov di, RMGLOBAL_VBE_BUFFER
+	int 10h
+	
+	movzx eax, ax
+	mov dword [RMGLOBAL_RETVAL], eax
 	jmp return_pmode
 
 
@@ -159,27 +209,30 @@ apm_shutdown:
 	mov ax, 0x5300						; Check if there's an APM BIOS.
 	mov bx, 0x0000
 	int 0x15
-	jc return_pmode						; Failure? Return to caller.
+	jc .fail							; Failure? Return to caller.
 	
 	cmp al, 2							; We need APM 1.2+ to power down.
-	jb return_pmode
+	jb .fail
 	
 	mov ax, 0x5301						; Connect real-mode interface.
 	mov bx, 0x0000
 	int 0x15
-	jc return_pmode
+	jc .fail
 	
 	mov ax, 0x530E						; Set the BIOS compatibility version.
 	mov bx, 0x0000
 	mov cx, 0x0102						; Request the BIOS uses APM 1.2.
 	int 0x15
-	jc return_pmode
+	jc .fail
 	
 	mov ax, 0x5307						; Set a device's APM power state.
 	mov bx, 0x0001						; Device ID 0001: all APM devices.
 	mov cx, 0x0003						; Power state 0003: off.
 	int 0x15
 	
+.fail:
+	movzx eax, ax
+	mov dword [RMGLOBAL_RETVAL], eax
 	jmp return_pmode					; If the power down failed, return.
 
 
@@ -196,7 +249,6 @@ get_pci_mechanism:
 	cmp ah, 0
 	je .pciget
 	
-;.fail:
 	mov dword [RMGLOBAL_PCICFG], 0xFFFFFFFF
 	jmp .done
 	
@@ -206,6 +258,7 @@ get_pci_mechanism:
 	mov byte [RMGLOBAL_PCICFG+3], dl
 
 .done:
+	mov dword [RMGLOBAL_RETVAL], 'UVRM'
 	jmp vga_set_mode3
 
 
@@ -228,7 +281,7 @@ back_pmode:
 	mov gs, ax
 	mov ss, ax
 	
-	mov eax, 'UVRM'
+	mov eax, dword [RMGLOBAL_RETVAL]
 	mov esp, dword [RMGLOBAL_ESP]
 	ret
 

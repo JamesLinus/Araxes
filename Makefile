@@ -100,7 +100,7 @@ hd: all
 hdqemu: hd
 	@echo " -- Executing QEMU                                (make hdqemu)"
 	@echo -n "     - "
-	qemu-system-i386 -m 128 -hda $(HDIMAGE) -vga std
+	qemu-system-i386 -m 128 -hda $(HDIMAGE) -vga std -net nic,model=rtl8139
 
 iso: all
 	@echo " -- Building LiveCD image                         (make iso)"
