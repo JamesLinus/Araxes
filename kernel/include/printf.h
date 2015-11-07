@@ -15,7 +15,7 @@
 int kvsnprintf(char* str, size_t size, const char* fmt, va_list va);
 int kprintf(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));
-int ksnprintf(char* s, size_t size, const char *fmt, ...)
+int snprintf(char* s, size_t size, const char *fmt, ...)
 	__attribute__ ((format (printf, 3, 4)));
 void crash(char* file, int line, const char* fmt, ...)
 	__attribute__ ((format (printf, 3, 4)));

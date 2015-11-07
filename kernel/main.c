@@ -19,6 +19,8 @@
 #include <hardware/uart.h>
 #include <vbe.h>
 
+#include "../libraries/hash/hash.h"
+
 #define EVOBOOT_BOOTLOADER_MAGIC 0x4D525655
 
 unsigned short serial_debugging = UART_BASE_RS0;	// can be a port base or 0 for don't enable
@@ -104,6 +106,10 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		console_print("VBE ");
 	
 	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL "Now with \x1B[37;1;41mA\x1B[42mN\x1B[43mS\x1B[44mI\x1B[45m \x1B[46mcolours!" VT100_SGR_NORMAL "\nAnd a build user/hostname!\n");
+	
+	kprintf("SHA-1 test: hash_sha1(\"The quick brown fox jumps over the lazy dog\") = \n"
+	        "            %s\n"
+	        "  Expected: %s\n", hash_sha1("The quick brown fox jumps over the lazy dog", strlen("The quick brown fox jumps over the lazy dog")), "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12");
 	
 	/*rmode_call(RMODE_CALL_VBE0);
 	

@@ -6,10 +6,9 @@
 #include <global.h>
 #include <mm.h>
 
-uint64_t cpu_rdtsc()
-{
+uint64_t cpu_rdtsc() {
     uint64_t ret;
-    asm volatile ( "rdtsc" : "=A"(ret) );
+    asm volatile ("rdtsc" : "=A"(ret));
     return ret;
 }
 

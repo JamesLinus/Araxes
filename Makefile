@@ -26,6 +26,10 @@ AS = i686-elf-as
 LD = i686-elf-ld
 NASM = nasm
 
+export CC AS LD NASM
+
+MAKEFLAGS += --no-print-directory
+
 ## This is pretty much because my cross-toolchain is broken and rebuilding it
 ## doesn't seem to fix it. Unless you happen to be the only other Kazinsal on
 ## the internet, you'll want to change this.
@@ -33,8 +37,10 @@ LIBGCC_DIR = /home/kazinsal/opt/cross/lib/gcc/i686-elf/4.8.2/
 
 KERNSOURCES_C := kernel/main.c kernel/global.c kernel/mm.c kernel/vga.c kernel/gdt.c kernel/idt.c kernel/printf.c kernel/fb_font.c kernel/vbe.c kernel/hardware/timer.c kernel/hardware/uart.c kernel/fs/mbr.c
 KERNSOURCES_ASM := kernel/entry.asm kernel/isr.asm
+LIBRARIES := libraries/hash/hash.a
+KERNLIBRARIES := libraries/hash/hash.a
 KERNOBJECTS := $(KERNSOURCES_C:.c=.o) kernel/rmode.o $(KERNSOURCES_ASM:.asm=.o)
-KERNOBJECTS_LINK := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o)
+KERNOBJECTS_LINK := $(KERNSOURCES_C:.c=.o) $(KERNSOURCES_ASM:.asm=.o) $(KERNLIBRARIES)
 KERNELF = evo-i686.elf
 
 KERNCFLAGS = -c -Ikernel/include -DKERNEL_VERSION_MAJOR=$(KERNEL_VERSION_MAJOR) -DKERNEL_VERSION_MINOR=$(KERNEL_VERSION_MINOR) -DKERNEL_VERSION_PATCH=$(KERNEL_VERSION_PATCH) -DKERNEL_VERSION_DEBUG=$(KERNEL_VERSION_DEBUG) -DKERNEL_BUILD_USER=$(KERNEL_BUILD_USER) -ffreestanding -std=gnu11 -O0 -Wall -Wextra
@@ -51,7 +57,7 @@ KERNEL_VERSION_DEBUG=29
 HDIMAGE = evo-6G.img
 CDIMAGE = evo.iso
 
-.PHONY: all alliso clean clean-kernel clean-boot kernel objects hd hdqemu iso isoqemu boot tools help
+.PHONY: all alliso clean clean-kernel clean-boot kernel objects hd hdqemu iso isoqemu boot tools help libraries
 .SUFFIXES: .c .asm
 
 help:
@@ -62,10 +68,11 @@ help:
 	@echo "     - tools:        Builds build assistance tools"
 	@echo "     - boot:         Builds EVOfs boot files"
 	@echo "     - kernel:       Builds BlacklightEVO kernel"
+	@echo "     - libraries:    Builds BlacklightEVO libraries"
 	@echo
 	@echo "     - hd:           all + Updates hard disk image boot partition"
 	@echo "     - hdqemu:       hd + executes QEMU"
-	@echo "     - iso:          all + Creates LiveCD image
+	@echo "     - iso:          all + Creates LiveCD image"
 	@echo "     - isoqemu:      iso + executes QEMU"
 	@echo
 	@echo "     - clean:        'make clean-tools clean-boot clean-kernel'"
@@ -117,7 +124,7 @@ isoqemu: iso
 objects:
 	@echo $(KERNOBJECTS)
 
-clean: clean-tools clean-boot clean-kernel
+clean: clean-tools clean-boot clean-kernel clean-libraries
 
 clean-tools:
 	@echo " -- Cleaning build assistance tools               (make clean-tools)"
@@ -131,13 +138,25 @@ clean-boot:
 	@echo " -- Cleaning boot objects                         (make clean-boot)"
 	@rm -f boot/evofs/mbr boot/evofs/vbr boot/evofs/stage2 2>/dev/null
 
+clean-libraries:
+	@echo " -- Cleaning libraries                            (make clean-libraries)"
+	@for lib in $(dir $(LIBRARIES)); do echo "     - $$lib"; cd $$lib; $(MAKE) clean; done
+
 ## We change the GRUB2 configs here for GRUB2 based bootloaders, updating the title text.
 pre-kernel:
 	@echo " -- Building kernel                               (make kernel)"
 	@sed -i "s/^title-text:.*/title-text: \"BlacklightEVO Development Build $(KERNEL_VERSION_MAJOR).$(KERNEL_VERSION_MINOR).$(KERNEL_VERSION_PATCH)`tools/debugver $(KERNEL_VERSION_DEBUG)`\"/" isosrc/boot/grub/grub-theme.cfg
 ##@sed -i "s/^menuentry \"BlacklightEVO.*/menuentry  \"BlacklightEVO $(KERNEL_VERSION_MAJOR).$(KERNEL_VERSION_MINOR).$(KERNEL_VERSION_PATCH)`tools/debugver $(KERNEL_VERSION_DEBUG)`\" {/" isosrc/boot/grub/grub.cfg
 
-kernel: tools pre-kernel $(KERNELF)
+kernel: tools $(KERNLIBRARIES) pre-kernel $(KERNELF)
+
+libraries: pre-libraries 
+	@for lib in $(dir $(LIBRARIES)); do $(MAKE) -s -C $$lib all DIRECTORY="$$lib"; done 
+
+pre-libraries:
+	@echo " -- Building libraries                            (make libraries)"
+	
+$(KERNLIBRARIES): libraries
 
 ## Boot code nasm, including the worst (best?) bash one-liner I've ever written
 boot:

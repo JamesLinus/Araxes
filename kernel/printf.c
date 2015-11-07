@@ -128,7 +128,7 @@ int kprintf(const char *fmt, ...) {
 	return ret;
 }
 
-int ksnprintf(char* s, size_t size, const char *fmt, ...) {
+int snprintf(char* s, size_t size, const char *fmt, ...) {
 	int ret;
 	va_list va;
 	va_start(va,fmt);
