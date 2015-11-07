@@ -8,6 +8,7 @@
 #include <printf.h>
 
 #include <hardware/timer.h>
+#include <hardware/rtc.h>
 
 #define IDT_ENTRIES 255
 
@@ -187,7 +188,7 @@ void idt_initialize(void) {
 	idt_isr_list[37] = isr_irq_generic_master;
 	idt_isr_list[38] = isr_irq_generic_master;
 	idt_isr_list[39] = isr_irq_generic_master;
-	idt_isr_list[40] = isr_irq_generic_slave;
+	idt_isr_list[40] = isr_irq_rtc;
 	idt_isr_list[41] = isr_irq_generic_slave;
 	idt_isr_list[42] = isr_irq_generic_slave;
 	idt_isr_list[43] = isr_irq_generic_slave;

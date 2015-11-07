@@ -54,6 +54,9 @@ static inline void io_wait(void) {
 	asm volatile ( "outb %%al, $0x80" : : "a"(0) );
 }
 
+uint64_t time_set(uint64_t newtime);
+uint64_t time_get(void);
+
 unsigned char inb(unsigned short port);
 void outb(unsigned short port, unsigned char data);
 unsigned short inw(unsigned short port);

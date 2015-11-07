@@ -16,6 +16,7 @@
 #include <multiboot.h>
 
 #include <hardware/timer.h>
+#include <hardware/rtc.h>
 #include <hardware/uart.h>
 #include <vbe.h>
 
@@ -101,6 +102,9 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	//kprintf("mm_heap_end = %8p\n", mm_heap_end);
 	paging_set_directory(paging_kernel_directory);
 	console_print("PG ");
+	
+	rtc_initialize();
+	console_print("RTC ");
 	
 	if (vbe_initialize())
 		console_print("VBE ");

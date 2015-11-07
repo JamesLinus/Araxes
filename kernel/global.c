@@ -6,6 +6,18 @@
 #include <global.h>
 #include <mm.h>
 
+uint64_t current_time = 0;
+int current_weekday = 0;
+
+uint64_t time_set(uint64_t newtime) {
+	current_time = newtime;
+	return current_time;
+}
+
+uint64_t time_get(void) {
+	return current_time;
+}
+
 uint64_t cpu_rdtsc() {
     uint64_t ret;
     asm volatile ("rdtsc" : "=A"(ret));
