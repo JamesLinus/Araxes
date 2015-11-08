@@ -54,8 +54,15 @@ static inline void io_wait(void) {
 	asm volatile ( "outb %%al, $0x80" : : "a"(0) );
 }
 
-uint64_t time_set(uint64_t newtime);
-uint64_t time_get(void);
+typedef struct {
+	int second, minute, hour, day, month, year, weekday;
+} datetime_t;
+
+int64_t time_timestamp(datetime_t dt);
+
+int64_t time_set(int64_t newtime);
+int64_t time_get(void);
+int time_get_weekday(void);
 
 unsigned char inb(unsigned short port);
 void outb(unsigned short port, unsigned char data);
@@ -87,6 +94,7 @@ char* strtok_r(char * str, const char * delim, char ** saveptr);
 int atoi(const char * str);
 char* u64toa(char* buf, uint64_t val, int base, int min);
 char* uitoa(char* buf, unsigned int val, int base, int min);
+char* i64toa(char* buf, int64_t val, int base, int min);
 char* itoa(char* buf, int val, int base, int min);
 
 /*void gdt_initialize(void);

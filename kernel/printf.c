@@ -64,7 +64,10 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 				case 'd':
 				case 'i':
 					i = 0;
-					itoa(tmp, va_arg(va, int), 10, w);
+					if (length < 2)
+						itoa(tmp, va_arg(va, int), 10, w);
+					else
+						i64toa(tmp, va_arg(va, int64_t), 10, w);
 					while (tmp[i])
 						*buf++ = tmp[i++];
 					break;

@@ -6,15 +6,13 @@
 #include <global.h>
 #include <hardware/rtc.h>
 
+extern int current_weekday;
+
 bool rtc_initialized = false;
 bool rtc_bcd = true;
 
 uint64_t last_tsc = 0;
 uint64_t recent_tsc = 0;
-
-#define leap_year(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
-
-int month_lengths[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, };
 
 // Change a BCD byte to a decimal integer.
 int bcdb_to_dec(unsigned char bcd) {
@@ -23,58 +21,46 @@ int bcdb_to_dec(unsigned char bcd) {
 
 // Resynchronize our timekeeping with the RTC's.
 void rtc_synchronize(void) {
-	int second, minute, hour, day, month, year, century, weekday;
-	int days = 0;
-	uint64_t new_time = 0;
+	int century;
+	int64_t new_time = 0;
+	datetime_t dt;
 	
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_SECOND);
-	second = inb(CMOS_PORT_DATA);
+	dt.second = inb(CMOS_PORT_DATA);
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_MINUTE);
-	minute = inb(CMOS_PORT_DATA);
+	dt.minute = inb(CMOS_PORT_DATA);
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_HOUR);
-	hour = inb(CMOS_PORT_DATA);
+	dt.hour = inb(CMOS_PORT_DATA);
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_DAY);
-	day = inb(CMOS_PORT_DATA);
+	dt.day = inb(CMOS_PORT_DATA);
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_MONTH);
-	month = inb(CMOS_PORT_DATA);
+	dt.month = inb(CMOS_PORT_DATA);
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_YEAR);
-	year = inb(CMOS_PORT_DATA);
+	dt.year = inb(CMOS_PORT_DATA);
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_CENTURY);
 	century = inb(CMOS_PORT_DATA);
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_WEEKDAY);
-	weekday = inb(CMOS_PORT_DATA);
+	dt.weekday = inb(CMOS_PORT_DATA);
 	
 	// Convert from BCD to regular binary decimal format.
 	if (rtc_bcd) {
-		second = bcdb_to_dec(second);
-		minute = bcdb_to_dec(minute);
-		hour = bcdb_to_dec(hour);
-		day = bcdb_to_dec(day);
-		month = bcdb_to_dec(month);
-		year = bcdb_to_dec(year);
+		dt.second = bcdb_to_dec(dt.second);
+		dt.minute = bcdb_to_dec(dt.minute);
+		dt.hour = bcdb_to_dec(dt.hour);
+		dt.day = bcdb_to_dec(dt.day);
+		dt.month = bcdb_to_dec(dt.month);
+		dt.year = bcdb_to_dec(dt.year);
 		century = bcdb_to_dec(century);
 	}
 	
+	// Set the current day of the week.
+	current_weekday = dt.weekday;
+	
 	// Make the year field the four digit year.
-	year = year + century * 100;
+	dt.year = dt.year + century * 100;
 	
-	for (int i = 0; i < month-1; i++) {
-		if (i == 1 && leap_year(year))
-			days += 1;
-		days += month_lengths[i];
-	}
-	
-	while (year > 1970) {
-		year--;
-		days += (leap_year(year) ? 366 : 365);
-	}
-	days += day-1;
-	
-	new_time = 86400 * days;
-	new_time += 3600 * hour;
-	new_time += 60 * minute;
-	new_time += second;
-	
+	// Convert our datetime structure to a 64-bit timestamp and save it.
+	new_time = time_timestamp(dt);
 	time_set(new_time);
 }
 
@@ -104,7 +90,7 @@ void rtc_initialize(void) {
 	
 	rtc_initialized = true;
 	rtc_synchronize();
-	kprintf("[RTC] New timestamp: %llu\n", time_get());
+	//kprintf("[RTC] New timestamp: %llu\n", time_get());
 	recent_tsc = cpu_rdtsc();
 }
 
@@ -121,15 +107,16 @@ void isr_irq_rtc(/*struct regs* regs*/) {
 	
 	if (status & CMOS_INTERRUPT_UPDATE) {
 		time_set(time_get() + 1);
-		if (time_get() % 180 == 0) {
+		if (time_get() % 10 == 0) {
 			rtc_synchronize();
+			//kprintf("Time synced with RTC. ");
 		}
 		
-		kprintf("Current timestamp: %llu - ", time_get());
+		//kprintf("Current timestamp: %lld\n", time_get());
 		
 		last_tsc = recent_tsc;
 		recent_tsc = cpu_rdtsc();
-		kprintf("Possible clock frequency: %llu Hz\n", recent_tsc-last_tsc);
+		//kprintf("Possible clock frequency: %llu Hz\n", recent_tsc-last_tsc);
 	}
 		
 	outb(0xA0, 0x20);
