@@ -83,13 +83,12 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	
 	
 	if (multiboot->flags & MULTIBOOT_INFO_MODS) {
-		//kprintf("We have %d modules! What are they? Let's find out:\n", multiboot->mods_count);
+		debug_printf(LOG_INFO "Enumerating %d Multiboot modules.\n", multiboot->mods_count);
 		multiboot_module_t* mod = (multiboot_module_t*)multiboot->mods_addr;
 		for (int i = 0; i < (int)multiboot->mods_count; i++) {
 			size_t mod_length = mod[i].mod_end - mod[i].mod_start;
-			//kprintf(" - Module %d: %s - start %p, end %p, length %p\n", i, (char*)mod[i].cmdline ? (char*)mod[i].cmdline : "none", (void*)mod[i].mod_start, (void*)mod[i].mod_end, (void*)mod_length);
+			debug_printf(LOG_INFO " - Module %d: %s - start %p, end %p, length %p\n", i, (char*)mod[i].cmdline ? (char*)mod[i].cmdline : "none", (void*)mod[i].mod_start, (void*)mod[i].mod_end, (void*)mod_length);
 			mm_heap_end += (mod_length % 0x1000 ? (mod_length & 0xFFFFF000) + 0x1000 : mod_length);
-			//kprintf("   mm_heap_end = %8p\n", mm_heap_end);
 		}
 	}
 	
@@ -99,7 +98,6 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	}
 	
 	mm_create_mmap(multiboot);
-	//kprintf("mm_heap_end = %8p\n", mm_heap_end);
 	paging_set_directory(paging_kernel_directory);
 	console_print("PG ");
 	

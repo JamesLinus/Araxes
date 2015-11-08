@@ -11,8 +11,6 @@ unsigned int timer_ticks;
 unsigned int timer_frequency;
 bool timer_initialized = false;
 unsigned short timer_divisor;
-unsigned long long last_tsc;
-unsigned long long tsc_difference;
 
 void timer_initialize(int frequency, bool reset_ticks) {
 	if (reset_ticks)
@@ -31,7 +29,6 @@ void timer_initialize(int frequency, bool reset_ticks) {
 	outb(0x40, ((timer_divisor >> 8) & 0xFF));
 
 	timer_initialized = true;
-	last_tsc = cpu_rdtsc();
 }
 
 void isr_irq_timer(/*struct regs* regs*/) {
@@ -40,23 +37,12 @@ void isr_irq_timer(/*struct regs* regs*/) {
 		return;
 	}
 	timer_ticks++;
-	tsc_difference = cpu_rdtsc() - last_tsc;
-	last_tsc = cpu_rdtsc();						// Kinda? Close enough I guess.
 
 	//if (CONSOLE_IS_FRAMEBUFFER) {
 		//__asm cli;
 		//fb_flip();
 		//__asm sti;
 	//}
-
-	/*if (timer_ticks % timer_frequency == 0)
-		kprintf("Tick: %u", timer_ticks);
-		
-	if (timer_ticks % (timer_frequency * 5) == 0) {
-		rmode_call(RMODE_CALL_DOWN);
-		kprintf("FUCK: Couldn't APM shutdown for some stupid reason.");
-		_crash();
-	}*/
 		
 	outb(0x20, 0x20);
 }
