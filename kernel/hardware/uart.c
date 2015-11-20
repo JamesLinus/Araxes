@@ -1,6 +1,6 @@
 // BlacklightEVO kernel/hardware/uart.c -- serial I/O
 // Copyright (c) 2013 The Cordilon Group
-// Please don't steal our code. Borrowing small chunks of it is okay, as long as you give us a shout-out.
+// The Blacklight project is under the terms of the ISC license. See license.md for details.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
 #include <global.h>
