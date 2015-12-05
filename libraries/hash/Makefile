@@ -3,7 +3,7 @@
 ## The Blacklight project is under the terms of the ISC license. See license.md for details.
 ## Questions? Comments? Concerns? Email us: blacklight@cordilon.net
 
-SOURCES_C := sha1.c
+SOURCES_C := sha1.c pbkdf2.c base64.c
 OBJECTS := $(SOURCES_C:.c=.o)
 OUTFILE = hash.a
 

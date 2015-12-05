@@ -21,6 +21,7 @@
 #include <vbe.h>
 
 #include "../libraries/hash/hash.h"
+#include "../libraries/hash/pbkdf2.h"
 
 #define EVOBOOT_BOOTLOADER_MAGIC 0x4D525655
 
@@ -111,39 +112,18 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	
 	kprintf("SHA-1 test: hash_sha1(\"The quick brown fox jumps over the lazy dog\") = \n"
 	        "            %s\n"
-	        "  Expected: %s\n", hash_sha1("The quick brown fox jumps over the lazy dog", strlen("The quick brown fox jumps over the lazy dog")), "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12");
+	        "  Expected: %s\n\n", hash_sha1("The quick brown fox jumps over the lazy dog", strlen("The quick brown fox jumps over the lazy dog")), "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12");
 	
-	/*rmode_call(RMODE_CALL_VBE0);
+	uint64_t tsc = cpu_rdtsc();
+	kprintf("PBKDF2 test: pbkdf2_sha1(\"MyCleverPassword\", \"MyWifiSSID\", 4096, 256) = \n"
+	        "             %s\n"
+	        "  Expected:  %s\n", pbkdf2_sha1("MyCleverPassword", "MyWifiSSID", 4096, 256), "e64d35c7c3077ff0c9fc16b2ba5730761f1e69be7f2912d7d427b8d90158c87e");
+	uint64_t tsc2 = cpu_rdtsc();
+	extern uint64_t probable_clock_frequency;
 	
-	if (*(unsigned char*)(RMGLOBAL_VBE_BUFFER+3) == '2')
-		kprintf("Apparently we don't have a VBE card? WTF?\n");
-	else {
-		kprintf("VBE card found:\n");
-		kprintf(" - OEM:      %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x06)));
-		kprintf(" - Vendor:   %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x16)));
-		kprintf(" - Product:  %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x1A)));
-		kprintf(" - Revision: %s\n", (char*)RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x1E)));
-		unsigned short* modelist = RMPTR(*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x0E));
-		kprintf(" - Modelist: %p\n", modelist);
-		kprintf(" - Modes:\n");
-		vbe_get_mode_info();
-		//for (int i = 0; vbe_modelist[i].mode != 0xFFFF; i++)
-			//kprintf("   0x%X: %dx%dx%d (%p)\n", vbe_modelist[i].mode, vbe_modelist[i].width, vbe_modelist[i].height, vbe_modelist[i].depth, vbe_modelist[i].framebuffer);
-	}*/
+	kprintf("PBKDF2 base64 test:\n");
+	char* ccc = pwstring_pbkdf2_sha1("MyCleverPassword", "MyWifiSSID", 4096, 256);
+	kprintf("%s\n", (ccc ? ccc : "NULL"));
 	
-	/*kprintf("A 64-bit integer (2^33): %llu\n", (uint64_t)1<<33);
-	kprintf("Two formats of the same hex: %#X %#x\n", 0x2BADB002, 0x2BADB002);
-	
-	char tstr[10] = {0};
-	ksnprintf(tstr, 8, "qwertyuiop");
-	kprintf("strlen(tstr): %u - \"%s\"\n\n", (unsigned int)strlen(tstr), tstr);*/
-	
-	//mm_dump_phys_mmap();
-	
-	//crash(__FILE__, __LINE__, "Testing the crash and the terminal all in one!");
-	//int* unmapped = (int*)0x78901234;
-	//*unmapped = 0xCAFEDEAD;
-	//kprintf("%d",*unmapped);
-	//kprintf("we shouldn't get here");
 	for (;;);
 }

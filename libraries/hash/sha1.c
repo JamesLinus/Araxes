@@ -1,4 +1,4 @@
-// BlacklightEVO libraries/hash/hash.c -- secure hash algorithms and HMAC
+// BlacklightEVO libraries/hash/sha1.c -- secure hash algorithms and HMAC
 // Copyright (c) 2013-2015 The Cordilon Group -- http://www.blacklightevo.org
 // The Blacklight project is under the terms of the ISC license. See license.md for details.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net

@@ -1,4 +1,4 @@
-// BlacklightEVO libraries/hash/hash.c -- secure hash algorithms and HMAC
+// BlacklightEVO libraries/hash/hash.h -- secure hash algorithms and HMAC
 // Copyright (c) 2013-2015 The Cordilon Group -- http://www.blacklightevo.org
 // The Blacklight project is under the terms of the ISC license. See license.md for details.
 // Questions? Comments? Concerns? Email us: blacklight@cordilon.net
@@ -7,6 +7,8 @@
 
 #ifndef __LIBRARIES__HASH__HASH_H
 #define __LIBRARIES__HASH__HASH_H
+
+#include <stdint.h>
 
 #define HASH_LENGTH 20
 #define BLOCK_LENGTH 64
@@ -29,4 +31,4 @@ uint8_t* sha1_hmac_result(sha1_info *s);
 
 char* hash_sha1(char* data, int length);
 
-#endif
+#endif	// __LIBRARIES__HASH__HASH_H

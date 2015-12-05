@@ -13,6 +13,7 @@ bool rtc_bcd = true;
 
 uint64_t last_tsc = 0;
 uint64_t recent_tsc = 0;
+uint64_t probable_clock_frequency = 0;
 
 // Change a BCD byte to a decimal integer.
 int bcdb_to_dec(unsigned char bcd) {
@@ -109,14 +110,15 @@ void isr_irq_rtc(/*struct regs* regs*/) {
 		time_set(time_get() + 1);
 		if (time_get() % 10 == 0) {
 			rtc_synchronize();
-			//kprintf("Time synced with RTC. ");
+			//kprintf("Probable clock frequency: %llu Hz", probable_clock_frequency);
 		}
 		
 		//kprintf("Current timestamp: %lld\n", time_get());
 		
 		last_tsc = recent_tsc;
 		recent_tsc = cpu_rdtsc();
-		//kprintf("Possible clock frequency: %llu Hz\n", recent_tsc-last_tsc);
+		if (last_tsc)
+			probable_clock_frequency = recent_tsc-last_tsc;
 	}
 		
 	outb(0xA0, 0x20);
