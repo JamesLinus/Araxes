@@ -171,7 +171,7 @@ char* hash_sha1(char* data, int length) {
 	result = sha1_result(&sha1_context);
 	
 	for (int i = 0; i < 20; i++) {
-		snprintf(hash+i*2, 2, "%02x", result[i]);
+		snprintf(hash+i*2, 3, "%02x", result[i]);
 	}
 	hash[41] = '\0';
 	return hash;

@@ -99,7 +99,7 @@ char* pbkdf2_sha1(char* password, char* salt, int c, int dkLen) {
 	result = pbkdf2_sha1_result(password, salt, c, dkLen);
 	
 	for (int i = 0; i < nout; i++) {
-		snprintf(hash+i*2, 2, "%02x", result[i]);
+		snprintf(hash+i*2, 3, "%02x", result[i]);
 	}
 	hash[nout*2] = '\0';
 	return hash;
