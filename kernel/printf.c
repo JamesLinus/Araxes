@@ -58,8 +58,11 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 						uitoa(tmp, va_arg(va, unsigned int), 10, w);
 					else
 						u64toa(tmp, va_arg(va, uint64_t), 10, w);
-					while (tmp[i])
+					while (tmp[i]) {
 						*buf++ = tmp[i++];
+						if ((size_t)(buf - str) == size-1)
+							break;
+					}
 					break;
 				case 'd':
 				case 'i':
@@ -68,8 +71,11 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 						itoa(tmp, va_arg(va, int), 10, w);
 					else
 						i64toa(tmp, va_arg(va, int64_t), 10, w);
-					while (tmp[i])
+					while (tmp[i]) {
 						*buf++ = tmp[i++];
+						if ((size_t)(buf - str) == size-1)
+							break;
+					}
 					break;
 				case 'x':
 				case 'X':
@@ -80,11 +86,17 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 						u64toa(tmp, va_arg(va, uint64_t), 16, w);
 					if (pf) {
 						*buf++ = '0';
+						if ((size_t)(buf - str) == size-1)
+							break;
 						*buf++ = (ch == 'x' ? 'x' : 'X');
+						if ((size_t)(buf - str) == size-1)
+							break;
 					}
 					while (tmp[i]) {
 						*buf++ = (ch == 'x' && tmp[i] <= 'F' && tmp[i] >= 'A') ? tmp[i] + 32 : tmp[i];
 						i++;
+						if ((size_t)(buf - str) == size-1)
+							break;
 					}
 					break;
 				case 'p':
@@ -92,8 +104,11 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 					uitoa(tmp, va_arg(va, unsigned int), 16, w);
 					*buf++ = '0';
 					*buf++ = 'x';
-					while (tmp[i])
+					while (tmp[i]) {
 						*buf++ = tmp[i++];
+						if ((size_t)(buf - str) == size-1)
+							break;
+					}
 					break;
 				case 'c':
 					*buf++ = (char)(va_arg(va, int));
@@ -101,8 +116,11 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 				case 's':
 					i = 0;
 					sztmp = va_arg(va, char*);
-					while (sztmp[i])
+					while (sztmp[i]) {
 						*buf++ = sztmp[i++];
+						if ((size_t)(buf - str) == size-1)
+							break;
+					}
 					break;
 				case '%':
 					*buf++ = ch;

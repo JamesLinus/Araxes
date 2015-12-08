@@ -79,6 +79,7 @@ help:
 	@echo "     - clean-tools:  Removes build assistance tool binaries"
 	@echo "     - clean-boot:   Removes EVOfs boot file binaries"
 	@echo "     - clean-kernel: Removes BlacklightEVO kernel binaries"
+	@echo "     - clean-kernel: Removes BlacklightEVO library binaries"
 
 all: tools boot kernel
 
