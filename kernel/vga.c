@@ -52,9 +52,7 @@ void vga_terminal_putchar(struct terminal_info* term, char c) {
 	bool cursor_dirty = false;
 	
 	if (term->status == TERMINAL_STATUS_FREE) {
-		/*if (c == '\x1B') {					// ANSI (ECMA-48) escape character
-			term->status = TERMINAL_STATUS_ANSI;
-		} else*/ if (c == '\n') {				// Line feed (implies carriage return)
+		if (c == '\n') {				// Line feed (implies carriage return)
 			term->column = 0;
 			term->row++;
 			cursor_dirty = true;
