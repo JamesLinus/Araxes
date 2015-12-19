@@ -52,9 +52,7 @@ void vga_terminal_putchar(struct terminal_info* term, char c) {
 	bool cursor_dirty = false;
 	
 	if (term->status == TERMINAL_STATUS_FREE) {
-		/*if (c == '\x1B') {					// ANSI (ECMA-48) escape character
-			term->status = TERMINAL_STATUS_ANSI;
-		} else*/ if (c == '\n') {				// Line feed (implies carriage return)
+		if (c == '\n') {				// Line feed (implies carriage return)
 			term->column = 0;
 			term->row++;
 			cursor_dirty = true;
@@ -96,11 +94,15 @@ void vga_terminal_write(struct terminal_info* term, const char* data, size_t len
 	int n[10] = {0};
 	
 	for ( size_t i = 0; i < datalen; i++ ) {
-		if (data[i] == '\x1B' && term->status != TERMINAL_STATUS_ANSI) {		// ANSI escape character
+		if (data[i] == '\x1B' || data[i] == '\x9B' && term->status != TERMINAL_STATUS_ANSI) {		// ANSI escape character
 			n_i = 0;
 			for (int j = 0; j < 10; j++)
 				n[j] = 0;
 			orig_i = i;
+
+			if (data[i] == '\x9B')		// C1 control 9B is a single-byte CSI
+				term->status = TERMINAL_STATUS_ANSI;
+
 			//debug_printf(LOG_INFO "Possible ANSI string encountered.\n");
 			while (i++ < datalen) {
 				if (data[i] == '[') {
