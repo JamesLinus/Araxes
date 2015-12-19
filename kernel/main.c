@@ -25,8 +25,6 @@
 
 #define EVOBOOT_BOOTLOADER_MAGIC 0x4D525655
 
-void dumb_pci_test(void);
-
 unsigned short serial_debugging = UART_BASE_RS0;	// can be a port base or 0 for don't enable
 extern const char nasm_version_string[];
 
@@ -127,7 +125,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	char* ccc = pwstring_pbkdf2_sha1("MyCleverPassword", "MyWifiSSID", 4096, 256);
 	kprintf("%s\n", (ccc ? ccc : "NULL"));*/
 	
-	dumb_pci_test();
+	pci_enumerate();
 	
 	for (;;);
 }
