@@ -100,6 +100,7 @@ hd: all
 	@sudo cp isosrc/boot/$(KERNELF) mnt/boot
 	@echo "     - isosrc/boot/grub/*.cfg"
 	@sudo cp isosrc/boot/grub/*.cfg mnt/boot/grub
+	@sudo cp isosrc/boot/grub/grub-hd.cfg mnt/boot/grub/grub.cfg
 	@echo "     - isosrc/boot/grub/*.png"
 	@sudo cp isosrc/boot/grub/*.png mnt/boot/grub
 	@sudo umount mnt
@@ -114,6 +115,8 @@ iso: all
 	@echo " -- Building LiveCD image                         (make iso)"
 	@echo "     - $(KERNELF) -> isosrc/boot"
 	@cp $(KERNELF) isosrc/boot
+	@cp isosrc/boot/grub/grub-iso.cfg isosrc/boot/grub/grub.cfg
+	@sed -i "s/^title-text:.*/title-text: \"BlacklightEVO Development Build $(KERNEL_VERSION_MAJOR).$(KERNEL_VERSION_MINOR).$(KERNEL_VERSION_PATCH)`tools/debugver $(KERNEL_VERSION_DEBUG)` LiveCD\"/" isosrc/boot/grub/grub-theme.cfg
 	@echo "     - grub-mkrescue -o $(CDIMAGE) isosrc"
 	@grub-mkrescue -o $(CDIMAGE) isosrc 2> iso.log; if grep "FAILURE" iso.log; then rm iso.log; exit 1; else rm iso.log; fi;
 	
@@ -147,7 +150,6 @@ clean-libraries:
 pre-kernel:
 	@echo " -- Building kernel                               (make kernel)"
 	@sed -i "s/^title-text:.*/title-text: \"BlacklightEVO Development Build $(KERNEL_VERSION_MAJOR).$(KERNEL_VERSION_MINOR).$(KERNEL_VERSION_PATCH)`tools/debugver $(KERNEL_VERSION_DEBUG)`\"/" isosrc/boot/grub/grub-theme.cfg
-##@sed -i "s/^menuentry \"BlacklightEVO.*/menuentry  \"BlacklightEVO $(KERNEL_VERSION_MAJOR).$(KERNEL_VERSION_MINOR).$(KERNEL_VERSION_PATCH)`tools/debugver $(KERNEL_VERSION_DEBUG)`\" {/" isosrc/boot/grub/grub.cfg
 
 kernel: tools $(KERNLIBRARIES) pre-kernel $(KERNELF)
 
