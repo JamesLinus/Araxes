@@ -158,7 +158,7 @@ void idt_initialize(void) {
 
 	idt_reload();
 	
-	outb(0x20, 0x11);							// Remap the IRQ table to interrupts 20 through 2F
+	outb(0x20, 0x11);				// Remap the IRQ table to interrupts 20 through 2F
 	io_wait();
 	outb(0xA0, 0x11);
 	io_wait();

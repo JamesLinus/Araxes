@@ -52,11 +52,11 @@ void vga_terminal_putchar(struct terminal_info* term, char c) {
 	bool cursor_dirty = false;
 	
 	if (term->status == TERMINAL_STATUS_FREE) {
-		if (c == '\n') {				// Line feed (implies carriage return)
+		if (c == '\n') {			// Line feed (implies carriage return)
 			term->column = 0;
 			term->row++;
 			cursor_dirty = true;
-		} else if (c == '\r') {				// Carriage return
+		} else if (c == '\r') {			// Carriage return
 			term->column = 0;
 			cursor_dirty = true;
 		} else {
@@ -103,18 +103,15 @@ void vga_terminal_write(struct terminal_info* term, const char* data, size_t len
 			if (data[i] == '\x9B')		// C1 control 9B is a single-byte CSI
 				term->status = TERMINAL_STATUS_ANSI;
 
-			//debug_printf(LOG_INFO "Possible ANSI string encountered.\n");
 			while (i++ < datalen) {
 				if (data[i] == '[') {
 					term->status = TERMINAL_STATUS_ANSI;
-					//_debug_printf(LOG_INFO "Beginning ANSI processing");
 					continue;
 				}
 				
 				if (term->status == TERMINAL_STATUS_ANSI) {
-					//_debug_printf(".");
 					if (data[i] == ' ')
-						continue;		// XXX: Is this a valid way of handling whitespace?
+						continue;	// XXX: Is this a valid way of handling whitespace?
 					else if (data[i] == ';') {
 						if (n_i < 10)
 							n_i++;
@@ -122,7 +119,7 @@ void vga_terminal_write(struct terminal_info* term, const char* data, size_t len
 						n[n_i] *= 10;
 						n[n_i] += (data[i]-'0');
 					} else if (data[i] > 126)
-						continue;		// XXX: Is this a valid way of handling invalid characters?
+						continue;	// XXX: Is this a valid way of handling invalid characters?
 					else {
 						switch (data[i]) {
 							case 'm':

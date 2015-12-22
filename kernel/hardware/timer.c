@@ -24,7 +24,7 @@ void timer_initialize(int frequency, bool reset_ticks) {
 		timer_frequency = 18;
 	}
 
-	outb(0x43, 0x36);							// Command to reinitialize the PIT it repeating mode
+	outb(0x43, 0x36);				// Command to reinitialize the PIT it repeating mode
 	outb(0x40, (timer_divisor & 0xFF));
 	outb(0x40, ((timer_divisor >> 8) & 0xFF));
 

@@ -57,8 +57,8 @@
 #define LOG_ERROR VT100_SGR_NORMAL VT100_SGR_FG_DEFAULT VT100_SGR_BG_DEFAULT VT100_SGR_BOLD VT100_SGR_REVERSE LOG_TIME "[ERROR] "
 #define LOG_FATAL VT100_SGR_NORMAL VT100_SGR_FG_DEFAULT VT100_SGR_BG_DEFAULT VT100_SGR_BG_RED VT100_SGR_BOLD VT100_SGR_FG_YELLOW LOG_TIME "[FATAL] "	// aaaaaaaaaaaaaa
 
-#define TERMINAL_STATUS_FREE	0		// Processing output as normal.
-#define TERMINAL_STATUS_ANSI	1		// Processing an ANSI escape sequence.
+#define TERMINAL_STATUS_FREE	0			// Processing output as normal.
+#define TERMINAL_STATUS_ANSI	1			// Processing an ANSI escape sequence.
 
 struct terminal_info {
 	int row, column;

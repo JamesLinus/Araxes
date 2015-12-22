@@ -17,7 +17,7 @@ gdtr_entry gdtr;
 bool gdt_used[GDT_ENTRIES / 2] = {false};
 unsigned short gdt_kernel_cs;
 unsigned short gdt_user_cs;
-unsigned short gdt_user_tss = 0x33;		// We're safe to use 0x33 here since gdt_add_selector handles the offset.
+unsigned short gdt_user_tss = 0x33;			// We're safe to use 0x33 here since gdt_add_selector handles the offset.
 
 tss_entry tss;
 
@@ -35,23 +35,23 @@ void gdt_initialize(void) {
 	gdtr.base = (unsigned int)gdt;
 	gdtr.limit = GDT_ENTRIES * 8;
 	
-	gdt_add_selector(0x00, 0, 0, 0, 0);			// Selector 0x00 is always unused according to Intel
-	gdt_add_selector(0x08, 0, 0, 0, 0);			// For us, 0x08 is the same.
+	gdt_add_selector(0x00, 0, 0, 0, 0);		// Selector 0x00 is always unused according to Intel
+	gdt_add_selector(0x08, 0, 0, 0, 0);		// For us, 0x08 is the same.
 	gdt_used[0] = true;
 
-	gdt_kernel_cs = gdt_add_task(0, 0xFFFFF, true);		// Should, under most circumstances, be 0x10
-	gdt_user_cs = gdt_add_task(0, 0xFFFFF, false);		// Should, under most circumstances, be 0x20
+	gdt_kernel_cs = gdt_add_task(0, 0xFFFFF, true);	// Should, under most circumstances, be 0x10
+	gdt_user_cs = gdt_add_task(0, 0xFFFFF, false);	// Should, under most circumstances, be 0x20
 	
 	gdt_add_selector(gdt_user_tss, (unsigned int)&tss, sizeof(tss)-1, 0xE9, 0x40);
 	memset(&tss, 0, sizeof(tss));
 	
-	tss.ss0  = gdt_kernel_cs+0x08;		// Kernel SS
-	tss.esp0 = 0;	// Kernel ESP
+	tss.ss0  = gdt_kernel_cs+0x08;			// Kernel SS
+	tss.esp0 = 0;					// Kernel ESP
 	tss.cs = gdt_kernel_cs | 0x3;
 	tss.ss = tss.ds = tss.es = tss.fs = tss.gs = (gdt_kernel_cs+0x08) | 0x3;
-	gdt_used[3] = true;		// Lock this down.
+	gdt_used[3] = true;				// Lock this down.
 
-	gdt_reload();	// PRAY IT DON'T GO BOOM
+	gdt_reload();					// PRAY IT DON'T GO BOOM
 	gdt_reload_tr();
 }
 

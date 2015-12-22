@@ -30,8 +30,6 @@ struct mbr_type {
 	char* name;
 };
 
-//extern struct mbr_type[256];
-
 extern char* mbr_type[256];
 
 #endif	// __KERNEL__INCLUDE__FS__MBR_H

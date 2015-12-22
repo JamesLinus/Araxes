@@ -28,7 +28,7 @@
 unsigned short serial_debugging = UART_BASE_RS0;	// can be a port base or 0 for don't enable
 extern const char nasm_version_string[];
 
-struct terminal_info default_terminal;				// Default terminal (VGA 80x25 text)
+struct terminal_info default_terminal;			// Default terminal (VGA 80x25 text)
 struct terminal_info* current_terminal = &default_terminal;
 
 char kernel_version_string[24] = {0};

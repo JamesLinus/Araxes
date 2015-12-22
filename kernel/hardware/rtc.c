@@ -85,7 +85,7 @@ void rtc_initialize(void) {
 	asm volatile ("sti");
 
 	if (status & 0x04)
-		rtc_bcd = false;				// I don't think I've ever seen a system set to binary mode, but if it does, handle it.
+		rtc_bcd = false;			// I don't think I've ever seen a system set to binary mode, but if it does, handle it.
 	else
 		rtc_bcd = true;
 	

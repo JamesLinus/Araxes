@@ -18,15 +18,10 @@ static const size_t align_to = 16;
 void* mm_heap_end = (void*)((unsigned int)&kernel_end);
 unsigned int mm_heap_cap = 0x01000000;
 
-void* mm_start_of_memory =	(void*)0x00100000;		// PRETEND DAMMIT
-void* mm_end_of_memory =	(void*)0x01000000;		// PRETEND DAMMIT
+void* mm_start_of_memory =	(void*)0x00100000;	// PRETEND DAMMIT
+void* mm_end_of_memory =	(void*)0x01000000;	// PRETEND DAMMIT
 
 unsigned char mm_phys_mmap[4096];
-
-void mm_clear(void) {
-	// THIS IS THE KICKIN RAD-EST WAY TO CRASH THE SYSTEM BY FAR
-	memset(mm_heap_end, 0, mm_heap_cap - (unsigned int)mm_heap_end);
-}
 
 void mm_create_mmap(multiboot_info_t* multiboot) {
 	unsigned int usable_memory = 0;

@@ -33,9 +33,9 @@ extern gdtr_entry gdtr;
 
 // Unmarked entries are unused.
 typedef struct {
-	unsigned int backlink;	// Backlink to the previous TSS in a hardware context switching linked list.
-	unsigned int esp0;		// Kernel mode ESP
-	unsigned int ss0;		// Kernel mode SS
+	unsigned int backlink;				// Backlink to the previous TSS in a hardware context switching linked list.
+	unsigned int esp0;				// Kernel mode ESP
+	unsigned int ss0;				// Kernel mode SS
 	unsigned int esp1;
 	unsigned int ss1;
 	unsigned int esp2;
@@ -51,12 +51,12 @@ typedef struct {
 	unsigned int ebp;
 	unsigned int esi;
 	unsigned int edi;
-	unsigned int es;		// Kernel mode ES
-	unsigned int cs;		// Kernel mode CS
-	unsigned int ss;		// Kernel mode SS, again
-	unsigned int ds;		// Kernel mode DS
-	unsigned int fs;		// Kernel mode FS
-	unsigned int gs;		// Kernel mode GS
+	unsigned int es;				// Kernel mode ES
+	unsigned int cs;				// Kernel mode CS
+	unsigned int ss;				// Kernel mode SS, again
+	unsigned int ds;				// Kernel mode DS
+	unsigned int fs;				// Kernel mode FS
+	unsigned int gs;				// Kernel mode GS
 	unsigned int ldt;
 	unsigned short reserved1;
 	unsigned short iomap_base;
@@ -67,7 +67,7 @@ extern unsigned short gdt_kernel_cs;
 extern unsigned short gdt_user_cs;
 
 void gdt_reload_tr(void);
-extern void gdt_reload(void);	// from kernel/entry.asm
+extern void gdt_reload(void);				// from kernel/entry.asm
 void gdt_initialize(void);
 void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags);
 unsigned short gdt_add_task(unsigned int base, unsigned int limit, bool kernel_mode);

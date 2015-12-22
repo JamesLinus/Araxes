@@ -23,7 +23,7 @@
 #include <hardware/uart.h>
 
 int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
-	char tmp[22];	// Enough to hold a 64-bit unsigned integer.
+	char tmp[22];					// Enough to hold a 64-bit unsigned integer.
 	char ch;
 	char* buf = str;
 	char* sztmp;
@@ -135,7 +135,6 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 }
 	
 int kprintf(const char *fmt, ...) {
-	//char buf[2048];
 	char* buf = (char*)malloc(2048);
 	int ret;
 	memset(buf, 0, 2048);
@@ -159,7 +158,6 @@ int snprintf(char* s, size_t size, const char *fmt, ...) {
 }
 
 int _debug_printf(const char* fmt, ...) {
-	//char buf[2048];
 	char* buf = (char*)malloc(2048);
 	int ret;
 	memset(buf, 0, 2048);
@@ -188,10 +186,10 @@ void crash(char* file, int line, const char* fmt, ...) {
 
 	va_end(args);
 
-	//debug_printf(UART_BASE_RS0, DEBUG_FATAL "crash()!: %s", buf);
+	debug_printf(LOG_FATAL "crash()!: %s", buf);
 
-	current_terminal->palette = PALETTE_EGA;		// Swap the palette back to EGA, since we're most likely either in xterm or truecolour
-	current_terminal->color = 0x4E;					// Bright yellow on red is a good indicator something's fucked up...
+	current_terminal->palette = PALETTE_EGA;	// Swap the palette back to EGA, since we're most likely either in xterm or truecolour
+	current_terminal->color = 0x4E;			// Bright yellow on red is a good indicator something's fucked up...
 	itoa(bc, line, 10, 1);
 	console_print("\nRSoD: crash() called at ");
 	console_print(file);
@@ -202,7 +200,7 @@ void crash(char* file, int line, const char* fmt, ...) {
 	console_print(buf);
 
 	//if (CONSOLE_IS_FRAMEBUFFER)
-	//	fb_flip();									// Flip the framebuffer so we can actually display our message
+	//	fb_flip();				// Flip the framebuffer so we can actually display our message
 
 	_crash();
 }
