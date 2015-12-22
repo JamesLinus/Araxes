@@ -26,10 +26,10 @@
 #define RMGLOBAL_VIDEO_WIDTH	0x5010
 #define RMGLOBAL_VIDEO_HEIGHT	0x5012
 #define RMGLOBAL_VIDEO_DEPTH	0x5014
-#define RMGLOBAL_VIDEO_MODE		0x5016
-#define RMGLOBAL_VBE_BUFFER		0x5200
+#define RMGLOBAL_VIDEO_MODE	0x5016
+#define RMGLOBAL_VBE_BUFFER	0x5200
 
-#define RMPTR(x) (void*)((x & 0xFFFF) + ((x & 0xFFFF0000) >> 12))
+#define RMPTR(x) (void*)(((unsigned int)x & 0xFFFFU) + (((unsigned int)x & 0xFFFF0000U) >> 12U))
 
 // Version defines and ints
 // MOVED TO MAKEFILE

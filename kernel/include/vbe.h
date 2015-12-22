@@ -6,6 +6,23 @@
 #ifndef __KERNEL__INCLUDE__VBE_H
 #define __KERNEL__INCLUDE__VBE_H
 
+#define VBE_ENUMERATION_DEBUG 0				// 0 for none, 1 for magic, 2 for more magic
+
+struct vbe_info_block {
+	unsigned char signature[4];
+	unsigned short version;
+	unsigned int oem_string;
+	unsigned int capabilities;
+	unsigned int modelist;
+	unsigned short memory_size;
+	unsigned short oem_revision;
+	unsigned int oem_vendor;
+	unsigned int oem_product_name;
+	unsigned int oem_product_revision;
+	unsigned char reserved[222];
+	unsigned char oem_data[256];
+} __attribute__((packed));
+
 struct vbe_mode_info {
 	unsigned short mode;
 	unsigned short width;
@@ -71,13 +88,15 @@ struct vbe_edid_info {
 	unsigned char checksum;
 } __attribute__((packed));
 
+extern unsigned char* multiboot_vbe_info;
+
 extern bool vbe_initialized;
 extern struct vbe_mode_info vbe_modelist[128];
 extern struct vbe_edid_info vbe_edid;
-extern char vbe_oem[48];
-extern char vbe_vendor[48];
-extern char vbe_product[48];
-extern char vbe_revision[48];
+extern char vbe_oem[64];
+extern char vbe_vendor[64];
+extern char vbe_product[64];
+extern char vbe_revision[64];
 
 bool vbe_exists(void);
 bool vbe_initialize(void);

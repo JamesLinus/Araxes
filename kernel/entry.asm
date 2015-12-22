@@ -22,7 +22,7 @@ align 4
 	dd MULTIBOOT_MAGIC
 	dd MULTIBOOT_FLAGS
 	dd MULTIBOOT_CHECKSUM
- 
+	
 ; Stack for the entry point and its code
 section .entry_stack
 align 4
@@ -40,22 +40,22 @@ _entry:
 	mov ecx, rmode_subkernel_end-rmode_subkernel
 	rep movsb
 	
-	cmp eax, 0x2BADB002					; If we were multibooted, we need to rmode_call().
+	cmp eax, 0x2BADB002				; If we were multibooted, we need to rmode_call().
 	jne .rmode_check
 	
-	mov dword [RMGLOBAL_EBX], ebx		; Pass our current EBX and EAX to the subkernel.
+	mov dword [RMGLOBAL_EBX], ebx			; Pass our current EBX and EAX to the subkernel.
 	mov dword [RMGLOBAL_EAX], eax
 	
-	mov dword [RMGLOBAL_PCICFG], 0		; Zeroed in case the BIOS doesn't zero low memory.
+	mov dword [RMGLOBAL_PCICFG], 0			; Zeroed in case the BIOS doesn't zero low memory.
 	
-	call RMGLOBAL_ENTRY					; Invoke the real mode subkernel.
+	call RMGLOBAL_ENTRY				; Invoke the real mode subkernel.
 	
 .rmode_check:
-	cmp eax, 'UVRM'						; Did the real mode subkernel return?
-	je .kernel_go						; Alternatively, were we loaded via EVOboot?
+	cmp eax, 'UVRM'					; Did the real mode subkernel return?
+	je .kernel_go					; Alternatively, were we loaded via EVOboot?
 	
-	push eax							; If neither of those are the case, display a WTF message.
-	mov eax, 'VGA3'						; Invoke the real mode subkernel to set a VGA text mode.
+	push eax					; If neither of those are the case, display a WTF message.
+	mov eax, 'VGA3'					; Invoke the real mode subkernel to set a VGA text mode.
 	call RMGLOBAL_ENTRY
 	pop eax
 	
@@ -80,40 +80,40 @@ _entry:
 	mov ecx, 8
 	mov edx, eax
 	
-.wtfloop:								; This loop dumps EDX as hexadecimal.
-	rol edx, 4							; Fetch the next digit into AL.
+.wtfloop:						; This loop dumps EDX as hexadecimal.
+	rol edx, 4					; Fetch the next digit into AL.
 	mov al, dl
-	and al, 0x0F						; Zero-extend the low nibble to the whole byte.
-	cmp al, 10							; CF = (AL < 10)
-	sbb al, 0x69						; AL = AL - (0x69 + CF)
-	das									; ... "Decimal Adjust after Subtraction"
-	mov byte [edi], al					; We now have the digit in ASCII in video memory.
+	and al, 0x0F					; Zero-extend the low nibble to the whole byte.
+	cmp al, 10					; CF = (AL < 10)
+	sbb al, 0x69					; AL = AL - (0x69 + CF)
+	das						; ... "Decimal Adjust after Subtraction"
+	mov byte [edi], al				; We now have the digit in ASCII in video memory.
 	inc edi
 	mov byte [edi], 0x4F				; White-on-red to inform the user this is a fatal error.
 	inc edi
 	loop .wtfloop
 	
-	jmp .hang							; We can't proceed further. Hang.
+	jmp .hang					; We can't proceed further. Hang.
 	
 .kernel_go:
-	mov edx, cr0						; We need to set up the FPU properly.
-	and edx, 0xFFFFFFFB					; Ensure the FPU Emulation bit is disabled.
-	or edx, 0x22						; Set the native exception and MP flags.
+	mov edx, cr0					; We need to set up the FPU properly.
+	and edx, 0xFFFFFFFB				; Ensure the FPU Emulation bit is disabled.
+	or edx, 0x22					; Set the native exception and MP flags.
 	mov cr0, edx
 	
-	fninit								; Initialize the FPU.
+	fninit						; Initialize the FPU.
 	fldcw [_value_0x37A]				; Unmask invalid operand and division exceptions.
 
-	push dword [RMGLOBAL_PCICFG]		; unsigned int pcicfg
+	push dword [RMGLOBAL_PCICFG]			; unsigned int pcicfg
 	push dword [RMGLOBAL_EAX]			; unsigned int old_magic
 	push dword [RMGLOBAL_EBX]			; multiboot_info_t* multiboot
-	push eax							; unsigned int magic
+	push eax					; unsigned int magic
 	
-	extern kernel_main					; Jump into the kernel's main function.
+	extern kernel_main				; Jump into the kernel's main function.
 	call kernel_main
 	
-.hang:									; We shouldn't ever get here, but just
-	cli									; in case we do somehow, lock up.
+.hang:							; We shouldn't ever get here, but just
+	cli						; in case we do somehow, lock up.
 	hlt
 	jmp .hang
 
@@ -122,16 +122,16 @@ _value_0x37A dw 0x37A
 global gdt_reload
 extern gdtr
 gdt_reload:
-	lgdt [gdtr]							; Load the GDT pointer.
+	lgdt [gdtr]					; Load the GDT pointer.
 	
-	mov ax, 0x18						; Load the kernel data selectors.
+	mov ax, 0x18					; Load the kernel data selectors.
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
 	
-	jmp 0x10:.flush						; Load the kernel code selector.
+	jmp 0x10:.flush					; Load the kernel code selector.
 
 .flush:
 	ret
@@ -140,7 +140,7 @@ gdt_reload:
 global idt_reload
 extern idtr
 idt_reload:
-	lidt [idtr]							; Load the IDT pointer.
+	lidt [idtr]					; Load the IDT pointer.
 	ret
 	
 
@@ -150,29 +150,29 @@ rmode_call:
 	push ebp
 	mov ebp, esp
 	
-	cli									; Interrupts remain off while we're in real mode.
+	cli						; Interrupts remain off while we're in real mode.
 	
 	mov eax, dword [ebp+8]				; unsigned int magic
-	call RMGLOBAL_ENTRY					; Invoke the real mode subkernel.
+	call RMGLOBAL_ENTRY				; Invoke the real mode subkernel.
 	
-	push eax							; Push the return value onto the stack just in case.
+	push eax					; Push the return value onto the stack just in case.
 	
-	call gdt_reload						; Load the kernel GDT.
-	call idt_reload						; Load the protected mode IDT.
+	call gdt_reload					; Load the kernel GDT.
+	call idt_reload					; Load the protected mode IDT.
 	
 	mov eax, dword [gdt+0x34]			; Clear the TSS descriptor's busy flag.
 	and ah, 0xFD
 	mov dword [gdt+0x34], eax
 	
-	mov ax, 0x33						; Load the Task Register.
+	mov ax, 0x33					; Load the Task Register.
 	ltr ax
 	
-	mov eax, cr0						; Re-enable paging.
+	mov eax, cr0					; Re-enable paging.
 	or eax, 0x80000000
 	mov cr0, eax
 	
-	pop eax								; Retrieve the return value.
-	sti									; We can safely turn interrupts back on now.
+	pop eax						; Retrieve the return value.
+	sti						; We can safely turn interrupts back on now.
 	
 	mov esp, ebp
 	pop ebp

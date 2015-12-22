@@ -62,6 +62,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		kprintf("FUCK: magic = 0x%8X\n", magic);
 		_crash();
 	}
+	
 	kprintf("multiboot structure = %8p\n", multiboot);
 	kprintf("pcicfg = 0x%8X\n", pcicfg);
 	gdt_initialize();
@@ -108,7 +109,7 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	if (vbe_initialize())
 		console_print("VBE ");
 	
-	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL "Now with \x1B[37;1;41mA\x1B[42mN\x1B[43mS\x1B[44mI\x1B[45m \x1B[46mcolours!" VT100_SGR_NORMAL "\nAnd a build user/hostname!\n");
+	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL);
 	
 	/*kprintf("SHA-1 test: hash_sha1(\"The quick brown fox jumps over the lazy dog\") = \n"
 	        "            %s\n"
@@ -126,6 +127,13 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	kprintf("%s\n", (ccc ? ccc : "NULL"));*/
 	
 	pci_enumerate();
+	
+	if (vbe_initialized) {
+		for (int i = 0; vbe_modelist[i].mode != 0xFFFF; i++) {
+			//if (vbe_modelist[i].mode)
+				//kprintf("%dx%dx%d ", vbe_modelist[i].width, vbe_modelist[i].height, vbe_modelist[i].depth);
+		}
+	}
 	
 	for (;;);
 }
