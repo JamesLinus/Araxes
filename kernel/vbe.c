@@ -143,6 +143,8 @@ void vbe_get_mode_info(void) {
 void vbe_get_edid_info(void) {
 	unsigned int rmodecall = 0;
 	unsigned char* edidbuf = (unsigned char*)RMGLOBAL_VBE_BUFFER;
+	vbe_have_edid = false;
+	
 	if (!vbe_exists())
 		return;
 		
@@ -153,5 +155,5 @@ void vbe_get_edid_info(void) {
 		memcpy(&vbe_edid, edidbuf, 128);
 		debug_printf(LOG_INFO "[VBE] EDID information retrieved.\n");
 	} else
-		debug_printf(LOG_WARNING "[VBE] No EDID information was available, got 0x%08X.\n", rmodecall);
+		kprintf(LOG_WARNING "[VBE] No EDID information was available, got 0x%08X.\n", rmodecall);
 }

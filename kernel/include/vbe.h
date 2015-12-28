@@ -91,6 +91,7 @@ struct vbe_edid_info {
 extern unsigned char* multiboot_vbe_info;
 
 extern bool vbe_initialized;
+extern bool vbe_have_edid;
 extern struct vbe_mode_info vbe_modelist[128];
 extern struct vbe_edid_info vbe_edid;
 extern char vbe_oem[64];

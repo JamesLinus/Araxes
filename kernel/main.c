@@ -135,5 +135,33 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 		}
 	}
 	
+	if (vbe_have_edid) {
+		kprintf("EDID results:\n");
+		for (int i = 0; i < 16; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n");
+		for (int i = 16; i < 32; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n");
+		for (int i = 32; i < 48; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n");
+		for (int i = 48; i < 64; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n");
+		for (int i = 64; i < 80; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n");
+		for (int i = 80; i < 96; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n");
+		for (int i = 96; i < 112; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n");
+		for (int i = 112; i < 128; i++)
+			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
+		kprintf("\n\n");
+	}
+	
 	for (;;);
 }
