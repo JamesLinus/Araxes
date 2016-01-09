@@ -78,38 +78,38 @@ uint64_t cpu_rdtsc() {
     return ret;
 }
 
-unsigned char inb(unsigned short port) {
-	unsigned char ret;
+uint8_t inb(uint16_t port) {
+	uint8_t ret;
 	asm volatile ("inb %1, %0" : "=a" (ret) : "dN" (port));
 	return ret;
 }
 
-void outb(unsigned short port, unsigned char data) {
+void outb(uint16_t port, uint8_t data) {
 	asm volatile ("outb %1, %0" : : "dN" (port), "a" (data));
 }
 
-unsigned short inw(unsigned short port) {
-	unsigned short ret;
+uint16_t inw(uint16_t port) {
+	uint16_t ret;
 	asm volatile ("inw %1, %0" : "=a" (ret) : "dN" (port));
 	return ret;
 }
 
-void outw(unsigned short port, unsigned short data) {
+void outw(uint16_t port, uint16_t data) {
 	asm volatile ("outw %1, %0" : : "dN" (port), "a" (data));
 }
 
-unsigned int ind(unsigned short port) {
-	unsigned int ret;
+uint32_t ind(uint16_t port) {
+	uint32_t ret;
 	asm volatile ("inl %%dx, %%eax" : "=a" (ret) : "dN" (port));
 	return ret;
 }
 
-void outd(unsigned short port, unsigned int data) {
+void outd(uint16_t port, uint32_t data) {
 	asm volatile ("outl %%eax, %%dx" : : "dN" (port), "a" (data));
 }
 
 int memcmp(const void* s1, const void* s2,size_t n) {
-	const unsigned char *p1 = (const unsigned char*)s1, *p2 = (const unsigned char*)s2;
+	const uint8_t *p1 = (const uint8_t*)s1, *p2 = (const uint8_t*)s2;
 	while(n--)
 		if( *p1 != *p2 )
 			return *p1 - *p2;
@@ -127,9 +127,9 @@ void *memcpy(void *dest, const void *src, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-	unsigned char* p = (unsigned char*)s;
+	uint8_t* p = (uint8_t*)s;
 	while(n--)
-		*p++ = (unsigned char)c;
+		*p++ = (uint8_t)c;
 	return s;
 }
 
@@ -160,7 +160,7 @@ char *strchr(const char *s, int c) {
 int strcmp(const char* s1, const char* s2) {
 	while(*s1 && (*s1==*s2))
 		s1++,s2++;
-	return *(const unsigned char*)s1-*(const unsigned char*)s2;
+	return *(const uint8_t*)s1-*(const uint8_t*)s2;
 }
 
 int strncmp(const char* s1, const char* s2, size_t n) {
@@ -168,7 +168,7 @@ int strncmp(const char* s1, const char* s2, size_t n) {
 		if (*s1 && (*s1==*s2))
 			s1++,s2++;
 		else
-			return *(const unsigned char*)s1-*(const unsigned char*)s2;
+			return *(const uint8_t*)s1-*(const uint8_t*)s2;
 	}
 	return 0;
 }
@@ -316,10 +316,10 @@ int abs(int val) {
 }
 
 int atoi(const char * str) {
-	unsigned int len = strlen(str);
-	unsigned int out = 0;
-	unsigned int i;
-	unsigned int pow = 1;
+	uint32_t len = strlen(str);
+	uint32_t out = 0;
+	uint32_t i;
+	uint32_t pow = 1;
 	for (i = len; i > 0; --i) {
 		out += (str[i-1] - 48) * pow;
 		pow *= 10;
@@ -354,7 +354,7 @@ char* u64toa(char* buf, uint64_t val, int base, int min) {
 	return buf;
 }
 
-char* uitoa(char* buf, unsigned int val, int base, int min) {
+char* uitoa(char* buf, uint32_t val, int base, int min) {
 	static char num[] = "0123456789ABCDEF";
 	char* wstr=buf;
 	
@@ -365,7 +365,7 @@ char* uitoa(char* buf, unsigned int val, int base, int min) {
 	}
 	
 	do {
-		*wstr++ = num[(unsigned int)val%base];
+		*wstr++ = num[(uint32_t)val%base];
 		if (min > 0)
 			min--;
 	} while (val/=base);
@@ -431,7 +431,7 @@ char* itoa(char* buf, int val, int base, int min) {
 	static char num[] = "0123456789ABCDEF";
 	char* wstr=buf;
 	int sign;
-	unsigned int uval = val;
+	uint32_t uval = val;
 	
 	// Validate base
 	if (base<2 || base>16){ *wstr='\0'; return buf; }
@@ -439,7 +439,7 @@ char* itoa(char* buf, int val, int base, int min) {
 	if (uval > 0x7FFFFFFF && base == 16) {
 
 		do {
-			*wstr++ = num[(unsigned int)uval%base];
+			*wstr++ = num[(uint32_t)uval%base];
 			if (min > 0)
 				min--;
 		} while (uval/=base);
@@ -455,7 +455,7 @@ char* itoa(char* buf, int val, int base, int min) {
 	
 		// Conversion. Number is reversed.
 		do {
-			*wstr++ = num[(unsigned int)val%base];
+			*wstr++ = num[(uint32_t)val%base];
 			if (min > 0)
 				min--;
 		} while (val/=base);

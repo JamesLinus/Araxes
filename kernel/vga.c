@@ -9,7 +9,7 @@
 
 #define vga_collapse(c,k) ((uint16_t) c | ((uint16_t) k) << 8)
  
-void vga_terminal_initialize(struct terminal_info* term, int width, int height, unsigned char* textbuffer) {
+void vga_terminal_initialize(struct terminal_info* term, int width, int height, uint8_t* textbuffer) {
 	term->row = 0;
 	term->column = 0;
 	term->default_color = 0x07;
@@ -28,7 +28,7 @@ void vga_terminal_initialize(struct terminal_info* term, int width, int height, 
 	for (int y = 0; y < term->height; y++) {
 		for (int x = 0; x < term->width; x++) {
 			int index = y * term->width + x;
-			((unsigned short*)(term->textbuffer))[index] = vga_collapse(' ', term->color);
+			((uint16_t*)(term->textbuffer))[index] = vga_collapse(' ', term->color);
 		}
 	}
 	debug_printf(LOG_INFO "Initializing VGA terminal at 0x%8X (%p, %p, %p).\n", term->textbuffer, term->initialize, term->putchar, term->writestring);
@@ -37,11 +37,11 @@ void vga_terminal_initialize(struct terminal_info* term, int width, int height, 
 static inline void vga_terminal_putentryat(struct terminal_info* term, char c, uint8_t color, size_t x, size_t y)
 {
 	const size_t index = y * term->width + x;
-	((unsigned short*)(term->textbuffer))[index] = vga_collapse(c, color);
+	((uint16_t*)(term->textbuffer))[index] = vga_collapse(c, color);
 }
 
 void vga_update_cursor(struct terminal_info* term) {
-	unsigned short location = term->row * term->width + term->column;
+	uint16_t location = term->row * term->width + term->column;
 	outb(0x3D4, 14);
 	outb(0x3D5, location >> 8);
 	outb(0x3D4, 15);
@@ -72,10 +72,10 @@ void vga_terminal_putchar(struct terminal_info* term, char c) {
 	if (term->row == term->height) {
 		cursor_dirty = true;
 		term->row--;
-		memcpy((unsigned short*)(term->textbuffer), (unsigned short*)(term->textbuffer) + term->width * 1, term->width * (term->height - 1) * 2);
+		memcpy((uint16_t*)(term->textbuffer), (uint16_t*)(term->textbuffer) + term->width * 1, term->width * (term->height - 1) * 2);
 		for (int x = 0; x < term->width; x++) {
 			const size_t index = (term->height - 1) * term->width + x;
-			((unsigned short*)(term->textbuffer))[index] = vga_collapse(' ', term->color);
+			((uint16_t*)(term->textbuffer))[index] = vga_collapse(' ', term->color);
 		}
 	}
 	

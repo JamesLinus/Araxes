@@ -29,7 +29,7 @@
 #define RMGLOBAL_VIDEO_MODE	0x5016
 #define RMGLOBAL_VBE_BUFFER	0x5200
 
-#define RMPTR(x) (void*)(((unsigned int)x & 0xFFFFU) + (((unsigned int)x & 0xFFFF0000U) >> 12U))
+#define RMPTR(x) (void*)(((uint32_t)x & 0xFFFFU) + (((uint32_t)x & 0xFFFF0000U) >> 12U))
 
 extern uint64_t timer_ms_ticks;
 
@@ -40,10 +40,10 @@ extern char kernel_version_string[];
 void build_kernel_version_string(void);
 
 struct regs {
-	unsigned int gs, fs, es, ds;
-	unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-	unsigned int int_no, err_code;
-	unsigned int eip, cs, eflags, useresp, ss;
+	uint32_t gs, fs, es, ds;
+	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+	uint32_t int_no, err_code;
+	uint32_t eip, cs, eflags, useresp, ss;
 };
 
 typedef void (*isr_t) (struct regs *);
@@ -66,14 +66,14 @@ int64_t time_set(int64_t newtime);
 int64_t time_get(void);
 int time_get_weekday(void);
 
-unsigned char inb(unsigned short port);
-void outb(unsigned short port, unsigned char data);
-unsigned short inw(unsigned short port);
-void outw(unsigned short port, unsigned short data);
-unsigned int ind(unsigned short port);
-void outd(unsigned short port, unsigned int data);
+uint8_t inb(uint16_t port);
+void outb(uint16_t port, uint8_t data);
+uint16_t inw(uint16_t port);
+void outw(uint16_t port, uint16_t data);
+uint32_t ind(uint16_t port);
+void outd(uint16_t port, uint32_t data);
 
-extern unsigned int rmode_call(unsigned int magic);
+extern uint32_t rmode_call(uint32_t magic);
 
 uint64_t cpu_rdtsc();
 int memcmp(const void * s1, const void * s2,size_t n);
@@ -96,15 +96,15 @@ char* strtok_r(char * str, const char * delim, char ** saveptr);
 
 int atoi(const char * str);
 char* u64toa(char* buf, uint64_t val, int base, int min);
-char* uitoa(char* buf, unsigned int val, int base, int min);
+char* uitoa(char* buf, uint32_t val, int base, int min);
 char* i64toa(char* buf, int64_t val, int base, int min);
 char* itoa(char* buf, int val, int base, int min);
 
 /*void gdt_initialize(void);
-void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags);
-unsigned short gdt_add_task(unsigned int base, unsigned int limit, bool kernel_mode);*/
+void gdt_add_selector(int offset, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
+uint16_t gdt_add_task(uint32_t base, uint32_t limit, bool kernel_mode);*/
 
 void idt_initialize(void);
-void idt_add_interrupt(int number, unsigned int base, unsigned short selector, unsigned char flags);
+void idt_add_interrupt(int number, uint32_t base, uint16_t selector, uint8_t flags);
 
 #endif	// __KERNEL__INCLUDE__GLOBAL_H

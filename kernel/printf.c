@@ -55,7 +55,7 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 				case 'u':
 					i = 0;
 					if (length < 2)
-						uitoa(tmp, va_arg(va, unsigned int), 10, w);
+						uitoa(tmp, va_arg(va, uint32_t), 10, w);
 					else
 						u64toa(tmp, va_arg(va, uint64_t), 10, w);
 					while (tmp[i]) {
@@ -81,7 +81,7 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 				case 'X':
 					i = 0;
 					if (length < 2)
-						uitoa(tmp, va_arg(va, unsigned int), 16, w);
+						uitoa(tmp, va_arg(va, uint32_t), 16, w);
 					else
 						u64toa(tmp, va_arg(va, uint64_t), 16, w);
 					if (pf) {
@@ -101,7 +101,7 @@ int kvsnprintf(char* str, size_t size, const char* fmt, va_list va) {
 					break;
 				case 'p':
 					i = 0;
-					uitoa(tmp, va_arg(va, unsigned int), 16, w);
+					uitoa(tmp, va_arg(va, uint32_t), 16, w);
 					*buf++ = '0';
 					*buf++ = 'x';
 					while (tmp[i]) {

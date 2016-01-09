@@ -23,7 +23,7 @@
 #include <x86/acpi.h>
 #define EVOBOOT_BOOTLOADER_MAGIC 0x4D525655
 
-unsigned short serial_debugging = UART_BASE_RS0;	// can be a port base or 0 for don't enable
+uint16_t serial_debugging = UART_BASE_RS0;	// can be a port base or 0 for don't enable
 extern const char nasm_version_string[];
 
 struct terminal_info default_terminal;			// Default terminal (VGA 80x25 text)
@@ -45,7 +45,7 @@ void build_kernel_version_string(void) {
 	}
 }
 
-void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int oldmagic, unsigned int pcicfg)
+void kernel_main(uint32_t magic, multiboot_info_t* multiboot, uint32_t oldmagic, uint32_t pcicfg)
 {
 	build_kernel_version_string();
 	vga_terminal_initialize(current_terminal, 80, 25, (void*)0xB8000);
@@ -57,12 +57,12 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	else if (magic == EVOBOOT_BOOTLOADER_MAGIC)
 		kprintf("Image loaded via EVOboot protocol%s.\n", (oldmagic == MULTIBOOT_BOOTLOADER_MAGIC ? " (via Multiboot-compatible bootloader)" : ""));
 	else {
-		kprintf("FUCK: magic = 0x%8X\n", magic);
+		kprintf("FUCK: magic = 0x%8lX\n", magic);
 		_crash();
 	}
 	
 	kprintf("multiboot structure = %8p\n", multiboot);
-	kprintf("pcicfg = 0x%8X\n", pcicfg);
+	kprintf("pcicfg = 0x%8lX\n", pcicfg);
 	gdt_initialize();
 	console_print("GDT ");
 	idt_initialize();

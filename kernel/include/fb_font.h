@@ -6,9 +6,9 @@
 #ifndef __KERNEL__INCLUDE__FB_FONT_H
 #define __KERNEL__INCLUDE__FB_FONT_H
 
-extern unsigned char fb_font_vga[4096];			// 8x16
-extern unsigned char fb_font_fixed[3328];		// 6x13
+extern uint8_t fb_font_vga[4096];			// 8x16
+extern uint8_t fb_font_fixed[3328];		// 6x13
 
-const char* get_font_name(unsigned char* font);
+const char* get_font_name(uint8_t* font);
 
 #endif	// __KERNEL__INCLUDE__FB_FONT_H

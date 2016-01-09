@@ -13,18 +13,18 @@ typedef struct mm_free_block {
 } mm_free_block;
 
 typedef struct {
-	unsigned long size;
-	unsigned long base_addr_low;
-	unsigned long base_addr_high;
-	unsigned long length_low;
-	unsigned long length_high;
-	unsigned long type;
+	uint32_t size;
+	uint32_t base_addr_low;
+	uint32_t base_addr_high;
+	uint32_t length_low;
+	uint32_t length_high;
+	uint32_t type;
 } memory_map_t;
 
 extern void* mm_kernel_end_palign;
 extern void* mm_heap_end;
 extern uint32_t kernel_end;
-extern unsigned int mm_heap_cap;
+extern uint32_t mm_heap_cap;
 
 void mm_clear(void);
 void mm_create_mmap(multiboot_info_t* multiboot);

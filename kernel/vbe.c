@@ -38,16 +38,16 @@ bool vbe_initialize(void) {
 #if VBE_ENUMERATION_DEBUG == 2
 	kprintf(VT100_SGR_BOLD "VBE debugging set to \"more magic\", dumping more magic:\n" VT100_SGR_NORMAL);
 	for (int i = 0; i < 16; i++)
-		kprintf("%02X ", ((unsigned char*)RMGLOBAL_VBE_BUFFER)[i]);
+		kprintf("%02X ", ((uint8_t*)RMGLOBAL_VBE_BUFFER)[i]);
 	kprintf("\n");
 	for (int i = 16; i < 32; i++)
-		kprintf("%02X ", ((unsigned char*)RMGLOBAL_VBE_BUFFER)[i]);
+		kprintf("%02X ", ((uint8_t*)RMGLOBAL_VBE_BUFFER)[i]);
 	kprintf("\n");
 	for (int i = 32; i < 48; i++)
-		kprintf("%02X ", ((unsigned char*)RMGLOBAL_VBE_BUFFER)[i]);
+		kprintf("%02X ", ((uint8_t*)RMGLOBAL_VBE_BUFFER)[i]);
 	kprintf("\n");
 	for (int i = 48; i < 64; i++)
-		kprintf("%02X ", ((unsigned char*)RMGLOBAL_VBE_BUFFER)[i]);
+		kprintf("%02X ", ((uint8_t*)RMGLOBAL_VBE_BUFFER)[i]);
 	kprintf("\n\n");
 #endif
 	
@@ -78,7 +78,7 @@ bool vbe_initialize(void) {
 void vbe_get_mode_info(void) {
 	int i = 0;
 	int j = 0;
-	unsigned short* modelist, *p;
+	uint16_t* modelist, *p;
 	
 	if (!vbe_initialized)
 		return;
@@ -92,8 +92,8 @@ void vbe_get_mode_info(void) {
 	debug_printf(LOG_INFO "[VBE] Doing mode list iteration.\n");
 	while (*p++ != 0xFFFF)
 		;
-	size_t modelist_size = (unsigned int)p - (unsigned int)modelist;
-	modelist = (unsigned short*) malloc(modelist_size);
+	size_t modelist_size = (uint32_t)p - (uint32_t)modelist;
+	modelist = (uint16_t*) malloc(modelist_size);
 	if (!modelist)
 		return;
 	memcpy(modelist, RMPTR(vbe_info.modelist), modelist_size);
@@ -113,14 +113,14 @@ void vbe_get_mode_info(void) {
 	kprintf("\n");
 #endif
 	for (i = 0; vbe_modelist[i].mode != 0xFFFF; i++) {
-		*(unsigned short*)(RMGLOBAL_VIDEO_MODE) = vbe_modelist[i].mode;
+		*(uint16_t*)(RMGLOBAL_VIDEO_MODE) = vbe_modelist[i].mode;
 #if VBE_ENUMERATION_DEBUG
 		kprintf("M%03X ", vbe_modelist[i].mode);
 #endif
 		rmode_call(RMODE_CALL_VBE1);
-		vbe_modelist[i].width = *(unsigned short*)(RMGLOBAL_VBE_BUFFER+0x12);
-		vbe_modelist[i].height = *(unsigned short*)(RMGLOBAL_VBE_BUFFER+0x14);
-		vbe_modelist[i].depth = *(unsigned char*)(RMGLOBAL_VBE_BUFFER+0x19);
+		vbe_modelist[i].width = *(uint16_t*)(RMGLOBAL_VBE_BUFFER+0x12);
+		vbe_modelist[i].height = *(uint16_t*)(RMGLOBAL_VBE_BUFFER+0x14);
+		vbe_modelist[i].depth = *(uint8_t*)(RMGLOBAL_VBE_BUFFER+0x19);
 		if (!vbe_modelist[i].width || !vbe_modelist[i].height || !vbe_modelist[i].depth) {
 			vbe_modelist[i].mode = 0;
 			vbe_modelist[i].width = 0;
@@ -129,8 +129,8 @@ void vbe_get_mode_info(void) {
 			continue;
 		}
 		
-		vbe_modelist[i].attributes = *(unsigned short*)(RMGLOBAL_VBE_BUFFER);
-		vbe_modelist[i].framebuffer = (void*)*(unsigned int*)(RMGLOBAL_VBE_BUFFER+0x28);
+		vbe_modelist[i].attributes = *(uint16_t*)(RMGLOBAL_VBE_BUFFER);
+		vbe_modelist[i].framebuffer = (void*)*(uint32_t*)(RMGLOBAL_VBE_BUFFER+0x28);
 	}
 	
 #if VBE_ENUMERATION_DEBUG
@@ -141,8 +141,8 @@ void vbe_get_mode_info(void) {
 }
 
 void vbe_get_edid_info(void) {
-	unsigned int rmodecall = 0;
-	unsigned char* edidbuf = (unsigned char*)RMGLOBAL_VBE_BUFFER;
+	uint32_t rmodecall = 0;
+	uint8_t* edidbuf = (uint8_t*)RMGLOBAL_VBE_BUFFER;
 	vbe_have_edid = false;
 	
 	if (!vbe_exists())

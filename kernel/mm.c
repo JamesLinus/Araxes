@@ -15,17 +15,17 @@
 static const size_t overhead = sizeof(size_t);
 static const size_t align_to = 16;
 
-void* mm_heap_end = (void*)((unsigned int)&kernel_end);
-unsigned int mm_heap_cap = 0x01000000;
+void* mm_heap_end = (void*)((uint32_t)&kernel_end);
+uint32_t mm_heap_cap = 0x01000000;
 
 void* mm_start_of_memory =	(void*)0x00100000;	// PRETEND DAMMIT
 void* mm_end_of_memory =	(void*)0x01000000;	// PRETEND DAMMIT
 
-unsigned char mm_phys_mmap[4096];
+uint8_t mm_phys_mmap[4096];
 
 void mm_create_mmap(multiboot_info_t* multiboot) {
-	unsigned int usable_memory = 0;
-	unsigned int usable_low_memory = 0;
+	uint32_t usable_memory = 0;
+	uint32_t usable_low_memory = 0;
 	memory_map_t* mmap = (memory_map_t*)multiboot->mmap_addr;
 	memset(mm_phys_mmap, 0, 4096);
 	mm_phys_mmap[0] = 0xFF;
@@ -42,19 +42,19 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 #if MM_DEBUG
 				debug_printf(LOG_INFO "Adding to mm_phys_mmap:");
 #endif
-				mm_phys_mmap[(mmap->base_addr_low) >> 20] = (unsigned char)mmap->type & 0xFF;
+				mm_phys_mmap[(mmap->base_addr_low) >> 20] = (uint8_t)mmap->type & 0xFF;
 #if MM_DEBUG
 				_debug_printf(" m[%u]=%u\n",(mmap->base_addr_low) >> 20, mmap->type);
 #endif
 			}
 			else if (!(mmap->base_addr_high) && mmap->base_addr_low >= 0x100000) {
-				unsigned int mem_size = mmap->length_low & 0xFFF00000;
+				uint32_t mem_size = mmap->length_low & 0xFFF00000;
 #if MM_DEBUG
 				debug_printf(LOG_INFO "Adding to mm_phys_mmap:");
 #endif
 				while (mem_size) {
 					mem_size -= 0x100000;
-					mm_phys_mmap[(mmap->base_addr_low + mem_size) >> 20] = (unsigned char)mmap->type & 0xFF;
+					mm_phys_mmap[(mmap->base_addr_low + mem_size) >> 20] = (uint8_t)mmap->type & 0xFF;
 					//_debug_printf(" m[%u]=%u",(mmap->base_addr_low + mem_size) >> 20, mmap->type);
 				}
 #if MM_DEBUG
@@ -67,10 +67,10 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 				usable_low_memory += mmap->length_low;
 		}
 #if MM_DEBUG
-		kprintf(" | 0x%8X%8X | 0x%8X%8X | 0x%2X |\n", (unsigned int)mmap->base_addr_high, (unsigned int)mmap->base_addr_low, (unsigned int)mmap->length_high, (unsigned int)mmap->length_low, (unsigned int)mmap->type);
+		kprintf(" | 0x%8X%8X | 0x%8X%8X | 0x%2X |\n", (uint32_t)mmap->base_addr_high, (uint32_t)mmap->base_addr_low, (uint32_t)mmap->length_high, (uint32_t)mmap->length_low, (uint32_t)mmap->type);
 #endif
 		
-		mmap = (memory_map_t*) ( (unsigned int)mmap + mmap->size + sizeof(unsigned int) );
+		mmap = (memory_map_t*) ( (uint32_t)mmap + mmap->size + sizeof(uint32_t) );
 	}
 #if MM_DEBUG
 	kprintf(" --------------------------------------------------\n");
@@ -83,24 +83,24 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 	
 	paging_kernel_directory = sbrk(sizeof(page_directory), true);
 	memset(paging_kernel_directory, 0, sizeof(page_directory));
-	paging_kernel_directory->phys_addr = (unsigned int)paging_kernel_directory->phys_tables;
+	paging_kernel_directory->phys_addr = (uint32_t)paging_kernel_directory->phys_tables;
 	
 #if MM_DEBUG
 	kprintf("paging_kernel_directory = %p\n", paging_kernel_directory);
 #endif
 	
-	for (unsigned int i = 0; i < 4096; i++) {
+	for (uint32_t i = 0; i < 4096; i++) {
 		if (mm_phys_mmap[i]) {
 			if (!(paging_kernel_directory->tables[i >> 2])) {
 				paging_kernel_directory->tables[i >> 2] = sbrk(sizeof(page_table), true);
 				memset(paging_kernel_directory->tables[i >> 2], 0, sizeof(page_table));
-				paging_kernel_directory->phys_tables[i >> 2] = ((unsigned int)paging_kernel_directory->tables[i >> 2] | 0x07);
+				paging_kernel_directory->phys_tables[i >> 2] = ((uint32_t)paging_kernel_directory->tables[i >> 2] | 0x07);
 			}
-			for (unsigned int j = 256 * (i & 0x03); j < (256 * (i & 0x03)) + 256; j++) {
+			for (uint32_t j = 256 * (i & 0x03); j < (256 * (i & 0x03)) + 256; j++) {
 				paging_kernel_directory->tables[i >> 2]->pages[j].present = 1;
 				paging_kernel_directory->tables[i >> 2]->pages[j].rw = 1;
 				paging_kernel_directory->tables[i >> 2]->pages[j].user = 1;
-				paging_kernel_directory->tables[i >> 2]->pages[j].frame = (unsigned int)(i * 256 + j%256);
+				paging_kernel_directory->tables[i >> 2]->pages[j].frame = (uint32_t)(i * 256 + j%256);
 			}
 		}
 	}
@@ -112,12 +112,12 @@ void mm_create_mmap(multiboot_info_t* multiboot) {
 
 void* sbrk(size_t size, bool page_align) {
 	// This is not actually a realistic sbrk implementation! What this does is simply an emulation to push the end-of-heap pointer along.
-	if (page_align && ((unsigned int)mm_heap_end & 0x00000FFF))
-		mm_heap_end = (void*)(((unsigned int)mm_heap_end & 0xFFFFF000) + 0x1000);
+	if (page_align && ((uint32_t)mm_heap_end & 0x00000FFF))
+		mm_heap_end = (void*)(((uint32_t)mm_heap_end & 0xFFFFF000) + 0x1000);
 	
-	if (((unsigned int)mm_heap_end + size) < mm_heap_cap) {
-		mm_heap_end = (void*)((unsigned int)mm_heap_end + size);
-		return (void*)((unsigned int)mm_heap_end - size);
+	if (((uint32_t)mm_heap_end + size) < mm_heap_cap) {
+		mm_heap_end = (void*)((uint32_t)mm_heap_end + size);
+		return (void*)((uint32_t)mm_heap_end - size);
 	} else {
 		if (mm_heap_cap * 2 > 0x04000000)
 			_crash(/*__FILE__, __LINE__, "sbrk(%d) exceeded mm_heap_cap, mm_heap_cap * 2 > 64 MiB.\n", size*/);
@@ -128,26 +128,32 @@ void* sbrk(size_t size, bool page_align) {
 }
 
 void mm_dump_phys_mmap(void) {
-	unsigned int start = 0;
-	unsigned int type = 0;
+	uint32_t start = 0;
+	uint32_t type = 0;
 	int i;
 	for (i = 0; i < 4096; i++) {
 		if (mm_phys_mmap[i] == type)
 			continue;
 		else {
 			if (i) {
-				kprintf("%8p - %8p  (type %d)\n", (void*)(start*0x100000), (void*)((i-1)*0x100000+0xFFFFF), type);
+				kprintf("%8p - %8p  (type %lu)\n", (void*)(start*0x100000), (void*)((i-1)*0x100000+0xFFFFF), type);
 			}
 			type = mm_phys_mmap[i];
 			start = i;
 		}
 	}	
-	kprintf("%8p - %8p  (type %d)\n", (void*)(start*0x100000), (void*)((i-1)*0x100000+0xFFFFF), type);
+	kprintf("%8p - %8p  (type %lu)\n", (void*)(start*0x100000), (void*)((i-1)*0x100000+0xFFFFF), type);
 }
 
-// A pretty strange but effective memory allocator by Kernighan and Ritchie.
-// I'm not sure how this ancient code actually works. I probably should, but
-// I'm afraid that if I try to figure out how it works, it'll stop working.
+// A pretty strange but effective memory allocator by Kernighan and Ritchie. I'm not sure how this
+// ancient code actually works. I probably should, but I'm afraid that if I try to figure out how
+// it works, it'll stop working.
+
+// UPDATE 2016-01-09: I need to figure out how this thing works, because it relies on "unsigned"
+// meaning "unsigned int", which is in the C standard not a fixed width datatype. morecore()
+// assigns a uint32_t value to "unsigned size", which could potentially have disastrous results.
+// My current line of thought is "get rid of this mess and replace it with something sane", but
+// the dumb hacker in me wants to see how long I can ride it out.
 
 typedef long Align;
 
@@ -166,7 +172,7 @@ static Header *freep = NULL;
 
 #define NALLOC 	1024
 
-Header *morecore(unsigned int nu) {
+Header *morecore(uint32_t nu) {
 	char *cp;
 	void free(void*);
 	Header *up;

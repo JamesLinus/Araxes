@@ -63,15 +63,15 @@
 struct terminal_info {
 	int row, column;
 	int width, height;
-	unsigned char default_color, color;
+	uint8_t default_color, color;
 	int mode;
 	int palette;
-	unsigned int fg, bg;
+	uint32_t fg, bg;
 	int input;
 	int status;
 	
-	unsigned char* textbuffer, framebuffer;
-	void (*initialize)(struct terminal_info* term, int width, int height, unsigned char* textbuffer);
+	uint8_t* textbuffer, framebuffer;
+	void (*initialize)(struct terminal_info* term, int width, int height, uint8_t* textbuffer);
 	void (*putchar)(struct terminal_info* term, char c);
 	void (*write)(struct terminal_info* term, const char* data, size_t length);
 	void (*writestring)(struct terminal_info* term, const char* data);

@@ -15,17 +15,17 @@
 #define OFFSET_FROM_BIT(a) (a%(8*4))
 
 typedef struct {
-	unsigned short limit_0_15;
-	unsigned short base_0_15;
-	unsigned char base_16_23;
-	unsigned char access;
-	unsigned char flags;
-	unsigned char base_24_31;
+	uint16_t limit_0_15;
+	uint16_t base_0_15;
+	uint8_t base_16_23;
+	uint8_t access;
+	uint8_t flags;
+	uint8_t base_24_31;
 } __attribute__((packed)) gdt_entry;
 
 typedef struct {
-    unsigned short limit;
-    unsigned int base;
+    uint16_t limit;
+    uint32_t base;
 } __attribute__((packed)) gdtr_entry;
 
 extern gdt_entry gdt[GDT_ENTRIES];
@@ -33,44 +33,44 @@ extern gdtr_entry gdtr;
 
 // Unmarked entries are unused.
 typedef struct {
-	unsigned int backlink;				// Backlink to the previous TSS in a hardware context switching linked list.
-	unsigned int esp0;				// Kernel mode ESP
-	unsigned int ss0;				// Kernel mode SS
-	unsigned int esp1;
-	unsigned int ss1;
-	unsigned int esp2;
-	unsigned int ss2;
-	unsigned int cr3;
-	unsigned int eip;
-	unsigned int eflags;
-	unsigned int eax;
-	unsigned int ecx;
-	unsigned int edx;
-	unsigned int ebx;
-	unsigned int esp;
-	unsigned int ebp;
-	unsigned int esi;
-	unsigned int edi;
-	unsigned int es;				// Kernel mode ES
-	unsigned int cs;				// Kernel mode CS
-	unsigned int ss;				// Kernel mode SS, again
-	unsigned int ds;				// Kernel mode DS
-	unsigned int fs;				// Kernel mode FS
-	unsigned int gs;				// Kernel mode GS
-	unsigned int ldt;
-	unsigned short reserved1;
-	unsigned short iomap_base;
+	uint32_t backlink;				// Backlink to the previous TSS in a hardware context switching linked list.
+	uint32_t esp0;				// Kernel mode ESP
+	uint32_t ss0;				// Kernel mode SS
+	uint32_t esp1;
+	uint32_t ss1;
+	uint32_t esp2;
+	uint32_t ss2;
+	uint32_t cr3;
+	uint32_t eip;
+	uint32_t eflags;
+	uint32_t eax;
+	uint32_t ecx;
+	uint32_t edx;
+	uint32_t ebx;
+	uint32_t esp;
+	uint32_t ebp;
+	uint32_t esi;
+	uint32_t edi;
+	uint32_t es;				// Kernel mode ES
+	uint32_t cs;				// Kernel mode CS
+	uint32_t ss;				// Kernel mode SS, again
+	uint32_t ds;				// Kernel mode DS
+	uint32_t fs;				// Kernel mode FS
+	uint32_t gs;				// Kernel mode GS
+	uint32_t ldt;
+	uint16_t reserved1;
+	uint16_t iomap_base;
 } __attribute__((packed)) tss_entry;
 
 extern bool gdt_used[GDT_ENTRIES / 2];
-extern unsigned short gdt_kernel_cs;
-extern unsigned short gdt_user_cs;
+extern uint16_t gdt_kernel_cs;
+extern uint16_t gdt_user_cs;
 
 void gdt_reload_tr(void);
 extern void gdt_reload(void);				// from kernel/entry.asm
 void gdt_initialize(void);
-void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags);
-unsigned short gdt_add_task(unsigned int base, unsigned int limit, bool kernel_mode);
+void gdt_add_selector(int offset, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
+uint16_t gdt_add_task(uint32_t base, uint32_t limit, bool kernel_mode);
 
 // TSS CRUD
 
@@ -79,13 +79,13 @@ void tss_set_esp0(void* new_esp0);
 
 // PAGING CRUD
 typedef struct {
-	unsigned int present:1;
-	unsigned int rw:1;
-	unsigned int user:1;
-	unsigned int accessed:1;
-	unsigned int dirty:1;
-	unsigned int unused:7;
-	unsigned int frame:20;
+	uint32_t present:1;
+	uint32_t rw:1;
+	uint32_t user:1;
+	uint32_t accessed:1;
+	uint32_t dirty:1;
+	uint32_t unused:7;
+	uint32_t frame:20;
 } __attribute__((packed)) page_entry;
 
 typedef struct {
@@ -93,9 +93,9 @@ typedef struct {
 } page_table;
 
 typedef struct {
-	unsigned int phys_tables[1024];
+	uint32_t phys_tables[1024];
 	page_table* tables[1024];
-	unsigned int phys_addr;
+	uint32_t phys_addr;
 } page_directory;
 
 extern page_table paging_kernel_tables[1024];
@@ -103,10 +103,10 @@ extern page_table paging_kernel_tables[1024];
 extern page_directory* paging_kernel_directory;
 extern page_directory* paging_current_directory;
 
-extern unsigned int* paging_frames;
-extern unsigned int paging_nframes;
+extern uint32_t* paging_frames;
+extern uint32_t paging_nframes;
 
-#define PAGING_ENTRY_PTR(x) (void*)((unsigned int)x & 0xFFFFF000)
+#define PAGING_ENTRY_PTR(x) (void*)((uint32_t)x & 0xFFFFF000)
 
-void paging_make_dentry(unsigned int* dentry, bool user);
+void paging_make_dentry(uint32_t* dentry, bool user);
 void paging_set_directory(page_directory* directory);
