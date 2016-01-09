@@ -9,70 +9,70 @@
 struct pci_device_info pci_devices[PCI_MAX_DEVICES];
 
 // Reads a 32-bit value from a PCI device's configuration space.
-unsigned int pci_config_read_dword(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset) {
-	unsigned int t_bus = bus & 0xFF;
-	unsigned int t_device = device & 0x1F;
-	unsigned int t_function = function & 0x07;
-	unsigned int t_offset = offset & 0xFC;
+uint32_t pci_config_read_dword(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset) {
+	uint32_t t_bus = bus & 0xFF;
+	uint32_t t_device = device & 0x1F;
+	uint32_t t_function = function & 0x07;
+	uint32_t t_offset = offset & 0xFC;
 	
-	unsigned int address = PCI_IO_ENABLE | (t_bus << 16) | (t_device << 11) | (t_function << 8) | t_offset;
+	uint32_t address = PCI_IO_ENABLE | (t_bus << 16) | (t_device << 11) | (t_function << 8) | t_offset;
 	outd(PCI_IO_CONFIG_ADDRESS, address);
 	return ind(PCI_IO_CONFIG_DATA);
 }
 
 // Reads a 16-bit value from a PCI device's configuration space.
-unsigned short pci_config_read_word(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset) {
-	unsigned int result = pci_config_read_dword(bus, device, function, offset);
-	unsigned int t_offset = (offset & 0x02) * 8;
+uint16_t pci_config_read_word(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset) {
+	uint32_t result = pci_config_read_dword(bus, device, function, offset);
+	uint32_t t_offset = (offset & 0x02) * 8;
 	return (result >> t_offset) & 0xFFFF;
 }
 
 // Reads an 8-bit value from a PCI device's configuration space.
-unsigned char pci_config_read_byte(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset) {
-	unsigned int result = pci_config_read_dword(bus, device, function, offset);
-	unsigned int t_offset = (offset & 0x03) * 8;
+uint8_t pci_config_read_byte(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset) {
+	uint32_t result = pci_config_read_dword(bus, device, function, offset);
+	uint32_t t_offset = (offset & 0x03) * 8;
 	return (result >> t_offset) & 0xFF;
 }
 
 // Writes a 32-bit value to a PCI device's configuration space.
-void pci_config_write_dword(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned int data) {
-	unsigned int t_bus = bus & 0xFF;
-	unsigned int t_device = device & 0x1F;
-	unsigned int t_function = function & 0x07;
-	unsigned int t_offset = offset & 0xFC;
+void pci_config_write_dword(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset, uint32_t data) {
+	uint32_t t_bus = bus & 0xFF;
+	uint32_t t_device = device & 0x1F;
+	uint32_t t_function = function & 0x07;
+	uint32_t t_offset = offset & 0xFC;
 	
-	unsigned int address = PCI_IO_ENABLE | (t_bus << 16) | (t_device << 11) | (t_function << 8) | t_offset;
+	uint32_t address = PCI_IO_ENABLE | (t_bus << 16) | (t_device << 11) | (t_function << 8) | t_offset;
 	outd(PCI_IO_CONFIG_ADDRESS, address);
 	outd(PCI_IO_CONFIG_DATA, data);
 }
 
 // Writes a 16-bit value to a PCI device's configuration space.
-void pci_config_write_word(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned short data) {
-	unsigned int result = pci_config_read_dword(bus, device, function, offset);
-	unsigned int t_offset = (offset & 0x02) * 8;
+void pci_config_write_word(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset, uint16_t data) {
+	uint32_t result = pci_config_read_dword(bus, device, function, offset);
+	uint32_t t_offset = (offset & 0x02) * 8;
 	result &= ~(0xFFFF << t_offset);
-	result |= ((unsigned int)data << t_offset);
+	result |= ((uint32_t)data << t_offset);
 	pci_config_write_dword(bus, device, function, offset, data);
 }
 
 // Writes an 8-bit value to a PCI device's configuration space.
-void pci_config_write_byte(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned char data) {
-	unsigned int result = pci_config_read_dword(bus, device, function, offset);
-	unsigned int t_offset = (offset & 0x03) * 8;
+void pci_config_write_byte(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset, uint8_t data) {
+	uint32_t result = pci_config_read_dword(bus, device, function, offset);
+	uint32_t t_offset = (offset & 0x03) * 8;
 	result &= ~(0xFF << t_offset);
-	result |= ((unsigned int)data << t_offset);
+	result |= ((uint32_t)data << t_offset);
 	pci_config_write_dword(bus, device, function, offset, data);
 }
 
 // Enumerates all the PCI devices on the system that we can find.
 void pci_enumerate(void) {
-	unsigned int bus = 0;
-	unsigned int device = 0;
-	unsigned int function = 0;
+	uint32_t bus = 0;
+	uint32_t device = 0;
+	uint32_t function = 0;
 	
-	unsigned short vendor_id = 0;
-	unsigned short device_id = 0;
-	unsigned char header_type = 0;
+	uint16_t vendor_id = 0;
+	uint16_t device_id = 0;
+	uint8_t header_type = 0;
 	
 	int j = 0;
 	

@@ -11,7 +11,7 @@
 // before serial login consoles are added to the OS.
 
 // Initialize a UART, setting the baud rate divisor and bitstream protocol for the selected port.
-void uart_init_serial(unsigned short port, unsigned short divisor, unsigned char protocol) {
+void uart_init_serial(uint16_t port, uint16_t divisor, uint8_t protocol) {
 	outb(port + 1, 0x00);
 	outb(port + 3, 0x80);
 	outb(port + 0, divisor & 0xFF);
@@ -22,23 +22,23 @@ void uart_init_serial(unsigned short port, unsigned short divisor, unsigned char
 }
 
 // Checks the status of a port's receive buffer.
-bool serial_received(unsigned short port) {
+bool serial_received(uint16_t port) {
 	return (inb(port + 5) & 1) ? true : false;
 }
 
 // Recieves a single byte from a serial port.
-unsigned char read_serial(unsigned short port) {
+uint8_t read_serial(uint16_t port) {
 	while (!serial_received(port));
 	return inb(port);
 }
 
 // Checks the status of a port's transmit buffer.
-bool is_transmit_empty(unsigned short port) {
+bool is_transmit_empty(uint16_t port) {
 	return (inb(port + 5) & 0x20) ? true : false;
 }
 
 // Transmits a single byte over a serial port.
-void write_serial(unsigned short port, char a) {
+void write_serial(uint16_t port, char a) {
 	if (a == '\n')
 		write_serial(port, '\r');
 
@@ -47,7 +47,7 @@ void write_serial(unsigned short port, char a) {
 }
 
 // Dumps a string to a serial port.
-void uart_print(unsigned short port, char* s) {
+void uart_print(uint16_t port, char* s) {
 	while (*s)
 		write_serial(port, *s++);
 }

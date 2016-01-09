@@ -16,7 +16,7 @@ uint64_t recent_tsc = 0;
 uint64_t probable_clock_frequency = 0;
 
 // Change a BCD byte to a decimal integer.
-static inline int bcdb_to_dec(unsigned char bcd) {
+static inline int bcdb_to_dec(uint8_t bcd) {
 	return ((bcd >> 4) * 10 + (bcd & 0x0F));
 }
 
@@ -70,8 +70,8 @@ void rtc_synchronize(void) {
 // time settings. Rather we initialize what we want the RTC chip to fire
 // interrupts for and start keeping track of time.
 void rtc_initialize(void) {
-	unsigned char status = 0;
-	unsigned char div = 0;
+	uint8_t status = 0;
+	uint8_t div = 0;
 	
 	// Disable interrupts. We don't want to possibly corrupt the RTC.
 	asm volatile ("cli");
@@ -111,7 +111,7 @@ void rtc_initialize(void) {
 }
 
 void isr_irq_rtc(/*struct regs* regs*/) {
-	unsigned char status = 0;
+	uint8_t status = 0;
 	if (!rtc_initialized) {
 		outb(0xA0, 0x20);
 		outb(0x20, 0x20);

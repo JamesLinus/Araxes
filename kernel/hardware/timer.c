@@ -7,10 +7,10 @@
 #include <printf.h>
 #include <hardware/timer.h>
 
-unsigned int timer_ticks;
-unsigned int timer_frequency;
+uint32_t timer_ticks;
+uint32_t timer_frequency;
 bool timer_initialized = false;
-unsigned short timer_divisor;
+uint16_t timer_divisor;
 
 // Initializes the PIT to a specified frequency and optionally resets the PIT tick counter.
 void timer_initialize(int frequency, bool reset_ticks) {

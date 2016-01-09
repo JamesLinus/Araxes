@@ -21,14 +21,14 @@
 #define UART_PROTOCOL_7N1 0x02
 #define UART_PROTOCOL_8N1 0x03
 
-extern unsigned short serial_debugging;
+extern uint16_t serial_debugging;
 
-void uart_init_serial(unsigned short port, unsigned short divisor, unsigned char protocol);
-bool serial_received(unsigned short port); 
-unsigned char read_serial(unsigned short port);
-bool is_transmit_empty(unsigned short port); 
-void write_serial(unsigned short port, char a);
+void uart_init_serial(uint16_t port, uint16_t divisor, uint8_t protocol);
+bool serial_received(uint16_t port); 
+uint8_t read_serial(uint16_t port);
+bool is_transmit_empty(uint16_t port); 
+void write_serial(uint16_t port, char a);
 
-void uart_print(unsigned short port, char* s);
+void uart_print(uint16_t port, char* s);
 
 #endif	// __KERNEL__INCLUDE__HARDWARE__UART_H

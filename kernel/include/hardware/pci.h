@@ -19,24 +19,24 @@
 #define PCI_DEVICE_LOADED 2
 
 struct pci_device_info {
-	unsigned int bus;
-	unsigned int device;
-	unsigned int function;
-	unsigned short vendor_id;
-	unsigned short device_id;
+	uint32_t bus;
+	uint32_t device;
+	uint32_t function;
+	uint16_t vendor_id;
+	uint16_t device_id;
 	
-	unsigned int device_handled;
+	uint32_t device_handled;
 };
 
 extern struct pci_device_info pci_devices[PCI_MAX_DEVICES];
 
-unsigned int pci_config_read_dword(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset);
-unsigned short pci_config_read_word(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset);
-unsigned char pci_config_read_byte(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset);
+uint32_t pci_config_read_dword(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset);
+uint16_t pci_config_read_word(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset);
+uint8_t pci_config_read_byte(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset);
 
-void pci_config_write_dword(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned int data);
-void pci_config_write_word(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned short data);
-void pci_config_write_byte(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned char data);
+void pci_config_write_dword(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset, uint32_t data);
+void pci_config_write_word(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset, uint16_t data);
+void pci_config_write_byte(uint32_t bus, uint32_t device, uint32_t function, uint32_t offset, uint8_t data);
 
 void pci_enumerate(void);
 
