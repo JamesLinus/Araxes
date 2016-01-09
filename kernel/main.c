@@ -20,9 +20,7 @@
 #include <hardware/uart.h>
 #include <vbe.h>
 
-#include "../libraries/hash/hash.h"
-#include "../libraries/hash/pbkdf2.h"
-
+#include <x86/acpi.h>
 #define EVOBOOT_BOOTLOADER_MAGIC 0x4D525655
 
 unsigned short serial_debugging = UART_BASE_RS0;	// can be a port base or 0 for don't enable
@@ -111,57 +109,9 @@ void kernel_main(unsigned int magic, multiboot_info_t* multiboot, unsigned int o
 	
 	kprintf(VT100_SGR_BOLD "\nLoaded.\n\n" VT100_SGR_NORMAL);
 	
-	/*kprintf("SHA-1 test: hash_sha1(\"The quick brown fox jumps over the lazy dog\") = \n"
-	        "            %s\n"
-	        "  Expected: %s\n\n", hash_sha1("The quick brown fox jumps over the lazy dog", strlen("The quick brown fox jumps over the lazy dog")), "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12");
-	
-	uint64_t tsc = cpu_rdtsc();
-	kprintf("PBKDF2 test: pbkdf2_sha1(\"MyCleverPassword\", \"MyWifiSSID\", 4096, 256) = \n"
-	        "             %s\n"
-	        "  Expected:  %s\n", pbkdf2_sha1("MyCleverPassword", "MyWifiSSID", 4096, 256), "e64d35c7c3077ff0c9fc16b2ba5730761f1e69be7f2912d7d427b8d90158c87e");
-	uint64_t tsc2 = cpu_rdtsc();
-	extern uint64_t probable_clock_frequency;
-	
-	kprintf("PBKDF2 base64 test:\n");
-	char* ccc = pwstring_pbkdf2_sha1("MyCleverPassword", "MyWifiSSID", 4096, 256);
-	kprintf("%s\n", (ccc ? ccc : "NULL"));*/
-	
 	pci_enumerate();
 	
-	if (vbe_initialized) {
-		for (int i = 0; vbe_modelist[i].mode != 0xFFFF; i++) {
-			//if (vbe_modelist[i].mode)
-				//kprintf("%dx%dx%d ", vbe_modelist[i].width, vbe_modelist[i].height, vbe_modelist[i].depth);
-		}
-	}
-	
-	if (vbe_have_edid) {
-		kprintf("EDID results:\n");
-		for (int i = 0; i < 16; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n");
-		for (int i = 16; i < 32; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n");
-		for (int i = 32; i < 48; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n");
-		for (int i = 48; i < 64; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n");
-		for (int i = 64; i < 80; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n");
-		for (int i = 80; i < 96; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n");
-		for (int i = 96; i < 112; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n");
-		for (int i = 112; i < 128; i++)
-			kprintf("%02X ", ((unsigned char*)&vbe_edid)[i]);
-		kprintf("\n\n");
-	}
+	acpi_get_rsdp();
 	
 	for (;;);
 }

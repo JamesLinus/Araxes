@@ -31,6 +31,8 @@
 
 #define RMPTR(x) (void*)(((unsigned int)x & 0xFFFFU) + (((unsigned int)x & 0xFFFF0000U) >> 12U))
 
+extern uint64_t timer_ms_ticks;
+
 // Version defines and ints
 // MOVED TO MAKEFILE
 
@@ -81,6 +83,7 @@ void* memset(void *s, int c, size_t n);
 char* strcat(char *dest, const char *src);
 char* strchr(const char *s, int c);
 int strcmp(const char * s1, const char * s2);
+int strncmp(const char * s1, const char * s2, size_t n);
 char* strcpy(char *dest, const char *src);
 size_t strcspn(const char *s1, const char *s2);
 char* strdup(const char* str);

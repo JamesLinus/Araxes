@@ -16,7 +16,7 @@ uint64_t recent_tsc = 0;
 uint64_t probable_clock_frequency = 0;
 
 // Change a BCD byte to a decimal integer.
-int bcdb_to_dec(unsigned char bcd) {
+static inline int bcdb_to_dec(unsigned char bcd) {
 	return ((bcd >> 4) * 10 + (bcd & 0x0F));
 }
 
@@ -43,7 +43,7 @@ void rtc_synchronize(void) {
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_WEEKDAY);
 	dt.weekday = inb(CMOS_PORT_DATA);
 	
-	// Convert from BCD to regular binary decimal format.
+	// Convert from BCD to regular binary decimal format if we need to.
 	if (rtc_bcd) {
 		dt.second = bcdb_to_dec(dt.second);
 		dt.minute = bcdb_to_dec(dt.minute);
@@ -71,25 +71,40 @@ void rtc_synchronize(void) {
 // interrupts for and start keeping track of time.
 void rtc_initialize(void) {
 	unsigned char status = 0;
+	unsigned char div = 0;
 	
+	// Disable interrupts. We don't want to possibly corrupt the RTC.
 	asm volatile ("cli");
 	
+	// Disable NMI and tell the RTC we want an update interrupt and a periodic interrupt.
+	// The update interrupt fires at the time the RTC updates the clock. The periodic
+	// interrupt fires on a regular basis. We set this up next.
 	outb(CMOS_PORT_INDEX, CMOS_NMI_DISABLE | CMOS_REGISTER_STATUS_B);
 	status = inb(CMOS_PORT_DATA);
-	status = status | CMOS_INTERRUPT_UPDATE;
+	status = status | CMOS_INTERRUPT_UPDATE | CMOS_INTERRUPT_PERIODIC;
 	outb(CMOS_PORT_INDEX, CMOS_NMI_DISABLE | CMOS_REGISTER_STATUS_B);
 	outb(CMOS_PORT_DATA, status);
 	
+	// Set the periodic interrupt's divisor to 0b1000 (256 Hz).
+	outb(CMOS_PORT_INDEX, CMOS_NMI_DISABLE | CMOS_REGISTER_STATUS_A);
+	div = inb(CMOS_PORT_DATA) & 0xF0;
+	div = div | 0x08;
+	outb(CMOS_PORT_INDEX, CMOS_NMI_DISABLE | CMOS_REGISTER_STATUS_A);
+	outb(CMOS_PORT_DATA, div);
+	
+	// Re-enable the non-maskable interrupt when reading status register C.
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_STATUS_C);
 	inb(CMOS_PORT_DATA);
-	asm volatile ("sti");
-
+	
+	// Very rarely a system will be set to have the RTC in binary mode. We need to see if it
+	// does, and if so, tell our clock synchronization routine to account for this.
 	if (status & 0x04)
-		rtc_bcd = false;			// I don't think I've ever seen a system set to binary mode, but if it does, handle it.
+		rtc_bcd = false;
 	else
 		rtc_bcd = true;
 	
 	rtc_initialized = true;
+	asm volatile ("sti");
 	rtc_synchronize();
 	//kprintf("[RTC] New timestamp: %llu\n", time_get());
 	recent_tsc = cpu_rdtsc();
@@ -103,6 +118,9 @@ void isr_irq_rtc(/*struct regs* regs*/) {
 		return;
 	}
 	
+	// Status Register C on the RTC chip tells us, among other things, what interrupts have
+	// fired most recently. If we do not read this status register, the RTC will not send out
+	// any more interrupts!
 	outb(CMOS_PORT_INDEX, CMOS_REGISTER_STATUS_C);
 	status = inb(CMOS_PORT_DATA);
 	
@@ -110,15 +128,23 @@ void isr_irq_rtc(/*struct regs* regs*/) {
 		time_set(time_get() + 1);
 		if (time_get() % 10 == 0) {
 			rtc_synchronize();
-			//kprintf("Probable clock frequency: %llu Hz", probable_clock_frequency);
 		}
 		
-		//kprintf("Current timestamp: %lld\n", time_get());
-		
+		// Make a crude estimation of the clock frequency. It doesn't really work well on
+		// systems that are overclocked and have a constant TSC, since the constant TSC
+		// (should) always operate at the base clock frequency of the CPU (eg. 3.6 GHz on
+		// an i7-3820).
 		last_tsc = recent_tsc;
 		recent_tsc = cpu_rdtsc();
 		if (last_tsc)
 			probable_clock_frequency = recent_tsc-last_tsc;
+	}
+	
+	if (status & CMOS_INTERRUPT_PERIODIC) {
+		timer_ms_ticks++;
+		
+		// Threads that yield due to sleep() will be woken up here.
+		// Process scheduling will be handled here.
 	}
 		
 	outb(0xA0, 0x20);
