@@ -6,6 +6,8 @@
 #ifndef __KERNEL__INCLUDE__FB_FONT_H
 #define __KERNEL__INCLUDE__FB_FONT_H
 
+#include <stdint.h>
+
 extern uint8_t fb_font_vga[4096];			// 8x16
 extern uint8_t fb_font_fixed[3328];		// 6x13
 
