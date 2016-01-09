@@ -12,10 +12,12 @@ unsigned int timer_frequency;
 bool timer_initialized = false;
 unsigned short timer_divisor;
 
+// Initializes the PIT to a specified frequency and optionally resets the PIT tick counter.
 void timer_initialize(int frequency, bool reset_ticks) {
 	if (reset_ticks)
 		timer_ticks = 0;
 
+	// The lowest frequency the PIT can go is 18.2 Hz, a divisor of 65536 (represented as 0).
 	if (frequency > 18) {
 		timer_divisor = 1193180 / frequency;
 		timer_frequency = frequency;
@@ -24,7 +26,8 @@ void timer_initialize(int frequency, bool reset_ticks) {
 		timer_frequency = 18;
 	}
 
-	outb(0x43, 0x36);				// Command to reinitialize the PIT it repeating mode
+	// Reinitialize the PIT with the new divisor and set it to repeating mode.
+	outb(0x43, 0x36);
 	outb(0x40, (timer_divisor & 0xFF));
 	outb(0x40, ((timer_divisor >> 8) & 0xFF));
 
@@ -38,11 +41,12 @@ void isr_irq_timer(/*struct regs* regs*/) {
 	}
 	timer_ticks++;
 
-	//if (CONSOLE_IS_FRAMEBUFFER) {
-		//__asm cli;
-		//fb_flip();
-		//__asm sti;
-	//}
+	/*if (CONSOLE_IS_FRAMEBUFFER) {
+	 *	__asm cli;
+	 *	fb_flip();
+	 *	__asm sti;
+	 *}
+	 */
 		
 	outb(0x20, 0x20);
 }

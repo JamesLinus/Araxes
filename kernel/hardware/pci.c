@@ -8,6 +8,7 @@
 
 struct pci_device_info pci_devices[PCI_MAX_DEVICES];
 
+// Reads a 32-bit value from a PCI device's configuration space.
 unsigned int pci_config_read_dword(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset) {
 	unsigned int t_bus = bus & 0xFF;
 	unsigned int t_device = device & 0x1F;
@@ -19,18 +20,21 @@ unsigned int pci_config_read_dword(unsigned int bus, unsigned int device, unsign
 	return ind(PCI_IO_CONFIG_DATA);
 }
 
+// Reads a 16-bit value from a PCI device's configuration space.
 unsigned short pci_config_read_word(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset) {
 	unsigned int result = pci_config_read_dword(bus, device, function, offset);
 	unsigned int t_offset = (offset & 0x02) * 8;
 	return (result >> t_offset) & 0xFFFF;
 }
 
+// Reads an 8-bit value from a PCI device's configuration space.
 unsigned char pci_config_read_byte(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset) {
 	unsigned int result = pci_config_read_dword(bus, device, function, offset);
 	unsigned int t_offset = (offset & 0x03) * 8;
 	return (result >> t_offset) & 0xFF;
 }
 
+// Writes a 32-bit value to a PCI device's configuration space.
 void pci_config_write_dword(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned int data) {
 	unsigned int t_bus = bus & 0xFF;
 	unsigned int t_device = device & 0x1F;
@@ -42,6 +46,7 @@ void pci_config_write_dword(unsigned int bus, unsigned int device, unsigned int 
 	outd(PCI_IO_CONFIG_DATA, data);
 }
 
+// Writes a 16-bit value to a PCI device's configuration space.
 void pci_config_write_word(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned short data) {
 	unsigned int result = pci_config_read_dword(bus, device, function, offset);
 	unsigned int t_offset = (offset & 0x02) * 8;
@@ -50,6 +55,7 @@ void pci_config_write_word(unsigned int bus, unsigned int device, unsigned int f
 	pci_config_write_dword(bus, device, function, offset, data);
 }
 
+// Writes an 8-bit value to a PCI device's configuration space.
 void pci_config_write_byte(unsigned int bus, unsigned int device, unsigned int function, unsigned int offset, unsigned char data) {
 	unsigned int result = pci_config_read_dword(bus, device, function, offset);
 	unsigned int t_offset = (offset & 0x03) * 8;
@@ -58,6 +64,7 @@ void pci_config_write_byte(unsigned int bus, unsigned int device, unsigned int f
 	pci_config_write_dword(bus, device, function, offset, data);
 }
 
+// Enumerates all the PCI devices on the system that we can find.
 void pci_enumerate(void) {
 	unsigned int bus = 0;
 	unsigned int device = 0;
@@ -69,12 +76,18 @@ void pci_enumerate(void) {
 	
 	int j = 0;
 	
-	debug_printf(LOG_INFO "Enumerating PCI devices. This might take a while.\n");
+	#if PCI_ENUMERATION_DEBUG
+		debug_printf(LOG_INFO "Enumerating PCI devices. This might take a while.\n");
+	#endif
 	
+	// Clear out the list of PCI devices in case it hasn't been done yet.
 	for (int i = 0; i < PCI_MAX_DEVICES; i++) {
 		pci_devices[i].device_handled = PCI_DEVICE_FREE;
 	}
 	
+	// The main enumeration loop. We do a brute force scan on each bus for devices, and each
+	// device for functions. We log each function we find as a found PCI device in the PCI
+	// device structure list.
 	for(bus = 0; bus < 256; bus++) {
 		for(device = 0; device < 32; device++) {
 			function = 0;
@@ -82,7 +95,7 @@ void pci_enumerate(void) {
 				device_id = pci_config_read_word(bus, device, function, 2);
 				header_type = pci_config_read_byte(bus, device, function, 0x0E);
 				#if PCI_ENUMERATION_DEBUG
-					kprintf("%02X:%02X:%d - 0x%04X:0x%04X - Header Type 0x%02X - 0x%08X\n", bus, device, function, vendor_id, device_id, header_type, pci_config_read_dword(bus, device, function, 0x08));
+					debug_printf(LOG_INFO "%02X:%02X:%d - 0x%04X:0x%04X - Header Type 0x%02X - 0x%08X\n", bus, device, function, vendor_id, device_id, header_type, pci_config_read_dword(bus, device, function, 0x08));
 				#endif
 				
 				pci_devices[j].bus = bus;
@@ -95,13 +108,18 @@ void pci_enumerate(void) {
 				if (++j == PCI_MAX_DEVICES)
 					break;
 				
+				// If bit 7 is set in the header type, we are dealing with a
+				// multifunction device. We need to iterate through the 7 other
+				// functions to see if they exist. Multifunction PCI devices are
+				// allowed to have discontiguous functions, much to the chagrin
+				// of anyone writing a PCI device enumerator.
 				if (header_type & 0x80) {
 					for (function = 1; function < 8; function++) {
 						if ((vendor_id = pci_config_read_word(bus, device, function, 0)) != 0xFFFF) {
 							device_id = pci_config_read_word(bus, device, function, 2);
 							header_type = pci_config_read_byte(bus, device, function, 0x0E);
 							#if PCI_ENUMERATION_DEBUG
-								kprintf("%02X:%02X:%d - 0x%04X:0x%04X - Header Type 0x%02X - 0x%08X\n", bus, device, function, vendor_id, device_id, header_type, pci_config_read_dword(bus, device, function, 0x08));
+								debug_printf(LOG_INFO "%02X:%02X:%d - 0x%04X:0x%04X - Header Type 0x%02X - 0x%08X\n", bus, device, function, vendor_id, device_id, header_type, pci_config_read_dword(bus, device, function, 0x08));
 							#endif
 							
 							pci_devices[j].bus = bus;
@@ -119,11 +137,14 @@ void pci_enumerate(void) {
 			}
 		}
 		
+		// If we run out of PCI device structures to fill, log it.
 		if (j == PCI_MAX_DEVICES) {
 			debug_printf(LOG_WARNING "PCI_MAX_DEVICES hit at bus %02X device %02X function %d.\n", bus, device, function);
 			break;
 		}
 	}
 	
-	debug_printf(LOG_INFO "Enumerated %d PCI devices.\n", j);
+	#if PCI_ENUMERATION_DEBUG
+		debug_printf(LOG_INFO "Enumerated %d PCI devices.\n", j);
+	#endif
 }
