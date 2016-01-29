@@ -57,7 +57,7 @@ KERNEL_VERSION_DEBUG=33
 HDIMAGE = evo-6G.img
 CDIMAGE = evo.iso
 
-.PHONY: all alliso clean clean-kernel clean-boot kernel objects hd hdqemu iso isoqemu boot tools help libraries
+.PHONY: all alliso clean clean-kernel clean-boot kernel objects hd hdqemu iso isoqemu isoqemcurses boot tools help libraries
 .SUFFIXES: .c .asm
 
 help:
@@ -74,6 +74,7 @@ help:
 	@echo "     - hdqemu:       hd + executes QEMU"
 	@echo "     - iso:          all + Creates LiveCD image"
 	@echo "     - isoqemu:      iso + executes QEMU"
+	@echo "     - isoqemucurses iso + executes QEMU -display curses"
 	@echo
 	@echo "     - clean:        'make clean-tools clean-boot clean-kernel'"
 	@echo "     - clean-tools:  Removes build assistance tool binaries"
@@ -124,6 +125,11 @@ isoqemu: iso
 	@echo " -- Executing QEMU                                (make isoqemu)"
 	@echo -n "     - "
 	qemu-system-i386 -m 128 -cdrom $(CDIMAGE) -vga std -net nic,model=rtl8139
+
+isoqemucurses: iso
+	@echo " -- Executing QEMU -display curses                (make isoqemucurses)"
+	@echo -n "     - "
+	qemu-system-i386 -m 128 -cdrom $(CDIMAGE) -vga std -display curses -net nic,model=rtl8139 
 
 objects:
 	@echo $(KERNOBJECTS)
